@@ -217,7 +217,7 @@ class QMaster(threading.Thread):
             conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
             print conf
             print traj.dry_xtc_fn
-            coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(str(traj.dry_xtc_fn), Conf=conf)
+            coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(traj.dry_xtc_fn, Conf=conf)
             coordinates.SaveToLHDF(str(traj.lh5_fn))
         
         except Exception as e:
