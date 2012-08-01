@@ -155,7 +155,7 @@ class Builder(object):
             def __getitem__(self, key):
                 if key == 'NumTrajs':
                     return len(trajs)
-                elif key == 'TrajLengths'
+                elif key == 'TrajLengths':
                     return np.array([t.length for t in trajs])
                 raise NotImplementedError('sfd')
             
