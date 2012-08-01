@@ -150,14 +150,11 @@ class Builder(object):
         # so, lets spoof it
         trajs = Session.query(Trajectory).filter(Trajectory.returned_time != None).all()
         
-        class BuilderProject(object):
+        class BuilderProject(dict):
             
-            def __getitem__(self, key):
-                if key == 'NumTrajs':
-                    return len(trajs)
-                elif key == 'TrajLengths':
-                    return np.array([t.length for t in trajs])
-                raise NotImplementedError(key)
+            def __init__(self):
+                self['NumTrajs'] = len(trajs)
+                self['TrajLengths'] = np.array([t.length for t in trajs])
             
             def LoadTraj(self, trj_index):
                 if trj_index < 0 or trj_index > len(trajs):
