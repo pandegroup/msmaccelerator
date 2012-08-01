@@ -13,7 +13,8 @@ from Queue import LifoQueue
 import subprocess
 import logging
 
-from msmbuilder import Trajectory
+import msmbuilder.Trajectory
+from models import Trajectory
 
 #set_debug_flag('debug')
 #set_debug_flag('wq')
@@ -194,7 +195,7 @@ class QMaster(threading.Thread):
         else:
             self.logger.debug('Not requesting production_wet{} from driver (implicit)'.format(traj.forcefield.output_extension))
         
-        #task.specify_tag(traj.id)
+        task.specify_tag(traj.id)
         task.specify_algorithm(WORK_QUEUE_SCHEDULE_FILES) # what does this do?
         
         
@@ -204,46 +205,19 @@ class QMaster(threading.Thread):
     def on_return(self, task):
         """Called by main thread on the return of data from the workers.
         Post-processing"""
-        self.logger.info('Retrieved "{0}" xtc. Converting to lh5...'.format(job['name']))
+        self.logger.info('Retrieved task {}'.format(task.tag)
+        traj = self.db.query(models.Trajectory).get(task.tag)
         
         try:
             # save lh5 version of the trajectory
-            traj_dir = self.project.traj_dir(job['ff'])
-            trajnum = len(glob(os.path.join(traj_dir, '*.lh5')))
-            lh5_fn = os.path.abspath(os.path.join(traj_dir, '%d.lh5' % trajnum))
-            conf = Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
-            traj = Trajectory.LoadTrajectoryFile(job['dry_xtc'], Conf=conf)
-            traj.SaveToLHDF(lh5_fn)
+            conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
+            coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(traj.dry_xtc_fn, Conf=conf)
+            coordinates.SaveToLHDF(traj.lh5_fn)
         
         except Exception as e:
-            self.logger.error('When postprocessing {0}, convert to lh5 failed!'.format(str(job)))
+            self.logger.error('When postprocessing {0}, convert to lh5 failed!'.format(t)
             self.logger.exception(e)
             raise
         
-        # create softlink to the lh5 trajectory in the JointFF directory
-        softlink_dir = self.project.traj_dir(self.project.joint_ff['name'])
-        
-        softlink_num = len(glob(os.path.join(softlink_dir, '*.lh5')))
-        softlink_fn = os.path.join(softlink_dir, '%d.lh5' % softlink_num)
-        os.symlink(lh5_fn, softlink_fn)
-
-        # update the TrajLog file
-        job['AllFF_fn'] = softlink_fn
-        job['lh5_fn'] = lh5_fn
-        job['TrajLength'] = len(traj)
-        job['lh5_trajnum'] = trajnum
-        self.project.traj_log_add(job)
+        traj.length = len(coordinates)
         self.logger.info('Finished converting new traj to lh5 sucessfully')
-    
-if __name__ == '__main__':
-    q = QMaster('.')
-    job = {'name': 'testjob3',
-           'driver': 'python /home/rmcgibbo/monakos/drivers/GROMACS/gromacs_driver.py',
-           'conf': Trajectory.LoadFromPDB('/home/rmcgibbo/monakos/drivers/GROMACS/ala5.pdb'),
-           'ff': 'amber99sb-ildn',
-           'water': 'tip3p',
-           'mode': 'equilibration',
-           'threads': 8}
-    
-    q.submit(job)
-    q.stop()

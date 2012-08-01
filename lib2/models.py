@@ -86,7 +86,7 @@ class Trajectory(Base):
     name = Column(String(STRING_LEN))
     returned_time = Column(Float)
     submit_time = Column(Float)
-    traj_length = Column(Integer) # in frames
+    length = Column(Integer) # in frames
     
     # many to one relationship
     forcefield_id = Column(Integer, ForeignKey('forcefields.id'))
