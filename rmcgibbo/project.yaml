@@ -33,4 +33,4 @@ adaptive_sampling:      even
 # Project settings
 project_dir: p1
 num_rounds: 100
-num_trajs_sufficient_for_round: 5
+num_trajs_sufficient_for_round: 1

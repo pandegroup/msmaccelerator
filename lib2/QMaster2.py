@@ -205,7 +205,7 @@ class QMaster(threading.Thread):
     def on_return(self, task):
         """Called by main thread on the return of data from the workers.
         Post-processing"""
-        self.logger.info('Retrieved task {}'.format(task.tag)
+        self.logger.info('Retrieved task {}', task.tag)
         traj = self.db.query(models.Trajectory).get(task.tag)
         
         try:
