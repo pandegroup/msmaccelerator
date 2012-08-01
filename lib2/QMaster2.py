@@ -187,11 +187,12 @@ class QMaster(threading.Thread):
         else:
             self.logger.debug('Not requesting production_wet{} from driver (implicit)'.format(traj.forcefield.output_extension))
         
-        task.specify_tag(traj.id)
+        #task.specify_tag(traj.id)
         task.specify_algorithm(WORK_QUEUE_SCHEDULE_FILES) # what does this do?
         
+        
         self.wq.submit(task)    
-        self.logger.info('Submitted to queue: {0} ({1}, {2})'.format(fileroot, job['ff'], job['name']))
+        self.logger.info('Submitted to queue: {}'.format(traj))
         
     def on_return(self, task):
         """Called by main thread on the return of data from the workers.
