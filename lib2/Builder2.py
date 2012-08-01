@@ -148,17 +148,19 @@ class Builder(object):
         
         # I want to use assign_in_memory, which requires an msmbuilder.Project
         # so, lets spoof it
+        trajs = Session.query(Trajectory).filter(Trajectory.returned_time != None).all()
+        
         class Project(dict):
             def __init__(self):
-                self['NumTrajs'] = len(forcefield.trajectories)
-                self['TrajLengths'] = np.array([t.length for t in forcefield.trajectories])
+                self['NumTrajs'] = len(trajs)
+                self['TrajLengths'] = np.array([t.length for t in trajs])
             
             def LoadTraj(self, trj_index):
-                if trj_index < 0 or trj_index > len(forcefield.trajectories):
-                    raise IOError("Not that many!")
-                print forcefield.trajectories[trj_index]
-                print 'loading from' + str(forcefield.trajectories[trj_index].lh5_fn)
-                val = msmbuilder.Trajectory.LoadTrajectoryFile(str(forcefield.trajectories[trj_index].lh5_fn))
+                if trj_index < 0 or trj_index > len(trajs):
+                    raise IndexError('Sorry')
+                    
+                print 'loading from' + trajs[trj_index].lh5_fn
+                val = msmbuilder.Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
                 print 'LOAD TRAJ {}'.format(trj_index)
                 print val
                 return val
@@ -172,7 +174,7 @@ class Builder(object):
         counts = self.construct_counts_matrix(assignments)
         
         return MarkovModel(counts=counts, assignments=assignments, distances=distances,
-            forcefield=forcefield, trajectories=forcefield.trajectories)
+            forcefield=forcefield, trajectories=trajs)
             
         
         
