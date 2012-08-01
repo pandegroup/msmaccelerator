@@ -55,6 +55,10 @@ def main():
         brain   = Brain(project)
         cause   = 'queue empty'
         
+        # try building right at the begining if theres any new data
+        # hanging out
+        builder.run_round(checkdata=True)
+        
         logger.info('Currently on round %d. Going to round %d' \
             % (builder.n_rounds, project.n_rounds))
 
