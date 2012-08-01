@@ -204,7 +204,7 @@ class Builder(object):
         elif self.project.symmetrize == 'mle':
             logger.debug('MLE symmetrizing')
             counts = EstimateReversibleCountMatrix(counts)
-        elif self.project.symmetrize == 'none' or self.project.symmetrize == None:
+        elif self.project.symmetrize.lower() == 'none' or self.project.symmetrize == None:
             logger.debug('Skipping symmetrization')
         else:
             raise ValueError("Could not understand symmetrization method: %s" % self.project.symmetrize)
