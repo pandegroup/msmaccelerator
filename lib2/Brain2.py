@@ -128,12 +128,8 @@ class Brain(object):
         
         forcefield = self.db.query(Forcefield).first()
         
-        self.logger.info('Committing')
-        trj = Trajectory(forcefield=forcefield)
-        self.db.add(trj)
-        self.db.commit()
-        trj.name = name
-        trj.mode='Equilibration'
+        trj = Trajectory(forcefield=forcefield,
+            name=name, mode='Equilibration')
         trj.init_pdb = conf
         
         return trj

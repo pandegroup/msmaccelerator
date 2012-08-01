@@ -7,7 +7,6 @@ Base = declarative_base()
 STRING_LEN = 500
 
 import msmbuilder.Trajectory
-from database import file_store_metaclass
 from Project2 import Project
 
 class Forcefield(Base):
@@ -28,36 +27,48 @@ class Forcefield(Base):
         return "<Forcefield(name={}, water={}, driver={})>".format(self.name,
             self.water, self.driver)
 
-
-from sqlalchemy.orm.interfaces import MapperExtension
-from sqlalchemy.orm.attributes import InstrumentedAttribute
-class MAPEX(MapperExtension):
-    @staticmethod
-    def after_insert(mapper, connection, instance):
-        for k,v in instance.__class__.__dict__.items():
-            if k.startswith('_') and k.endswith('_fn') and isinstance(v, InstrumentedAttribute):
-                if getattr(instance, k) is None:
-                    name_of_default_method = '_default' + k + '_'
-                    value = getattr(instance, name_of_default_method)()
-                    setattr(instance, k, value)
-
 class Trajectory(Base):
     """
     database model describing a trajectory
     """
     
     __tablename__ = 'trajectories'
-    __metaclass__ = file_store_metaclass
-    __mapper_args__ = {'extension' : MAPEX}
     
     id = Column(Integer, primary_key=True)
-    _init_pdb_fn = Column(String(STRING_LEN))
-    _wqlog_fn = Column(String(STRING_LEN))
-    _dry_xtc_fn = Column(String(STRING_LEN))
-    _wet_xtc_fn = Column(String(STRING_LEN))
-    _lh5_fn = Column(String(STRING_LEN))
-    _last_wet_snapshot_fn = Column(String(STRING_LEN))
+    
+    init_pdb_fn = Column(String(STRING_LEN))
+    wqlog_fn = Column(String(STRING_LEN))
+    dry_xtc_fn = Column(String(STRING_LEN))
+    wet_xtc_fn = Column(String(STRING_LEN))
+    lh5_fn = Column(String(STRING_LEN))
+    last_wet_snapshot_fn = Column(String(STRING_LEN))
+    
+    
+    def __basefn(self):
+        return '{base}/{ff}/'.format(base=Project.instance.project_dir, ff=self.forcefield.name)
+    def default_init_pdb_fn(self):
+       return self.__basefn() + 'Inits/{id}.pdb'.format(id=self.id)
+    def default_wqlog_fn(self):
+        return self.__basefn() + 'WQLogs/{id}.log.txt'.format(id=self.id)
+    def default_dry_xtc_fn(self):
+        return self.__basefn() + 'DryXTCs/{id}.xtc'.format(id=self.id)
+    def default_wet_xtc_fn(self):
+        return self.__basefn() + 'WetXTCs/{id}.xtc'.format(id=self.id)
+    def default_lh5_fn(self):
+        return self.__basefn() + 'LH5s/{id}.lh5'.format(id=self.id)
+    def default_last_wet_snapshot_fn(self):
+        return self.__basefn() + 'LastWetSnapshots/{id}.lh5'.format(id=self.id)
 
+    def populate_default_filenames(self):
+        for name in ['init_pdb_fn', 'wqlog_fn', 'dry_xtc_fn', 'wet_xtc_fn',
+            'lh5_fn', 'last_wet_snapshot_fn']:
+            if getattr(self, name) is None:
+                # call the method
+                default = getattr(self, 'default_' + name)()
+                # set the field
+                setattr(self, name, default)
+                
+        
     host = Column(String(STRING_LEN))
     mode = Column(String(STRING_LEN))
     name = Column(String(STRING_LEN))
@@ -69,26 +80,6 @@ class Trajectory(Base):
     forcefield_id = Column(Integer, ForeignKey('forcefields.id'))
     forcefield = relationship("Forcefield", backref=backref('trajectories', order_by=id))
     
-    
-    def __basefn(self):
-            return '{base}/{ff}/'.format(base=Project.instance.project_dir, ff=self.forcefield.name)
-    def _default_init_pdb_fn_(self):
-        return self.__basefn() + 'Inits/{id}.pdb'.format(id=self.id)
-    def _default_wqlog_fn_(self):
-        return self.__basefn() + 'WQLogs/{id}.log.txt'.format(id=self.id)
-    def _default_dry_xtc_fn_(self):
-        return self.__basefn() + 'DryXTCs/{id}.xtc'.format(id=self.id)
-    def _default_wet_xtc_fn_(self):
-        return self.__basefn() + 'WetXTCs/{id}.xtc'.format(id=self.id)
-    def _default_lh5_fn_(self):
-        return self.__basefn() + 'LH5s/{id}.lh5'.format(id=self.id)
-    def _default_last_wet_snapshot_fn_(self):
-        return self.__basefn() + 'LastWetSnapshots/{id}.lh5'.format(id=self.id)
-    
-
-
-
-
     def __repr__(self):
         return "<Trajectory(name={})>".format(self.name)
         
@@ -107,10 +98,10 @@ class Trajectory(Base):
         """
         
         if self.wet_xtc_fn is not None:
-            conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.last_wet_snapshot)
+            conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.last_wet_snapshot_fn)
             xyz = msmbuilder.Trajectory.ReadFrame(self.wet_xtc_fn, frame_index)
         else:
-            conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
+            conf = msmbuilder.Trajectory.LoadTrajectoryFile(Project().pdb_topology_file)
             xyz = msmbuilder.Trajectory.ReadFrame(xtc_path, frame_index)
 
         if not (xyz.shape == conf['XYZList'][0,:,:].shape):
@@ -130,22 +121,11 @@ class MarkovModel(Base):
     Each BuildRound contains multiple MarkovModels
     """
     __tablename__ = 'markov_models'
-    __metaclass__ = file_store_metaclass
     
     id = Column(Integer, primary_key=True)
-    _counts_fn = Column(String(STRING_LEN))
-    _assignments_fn = Column(String(STRING_LEN))
-    _inverse_assignments_fn = Column(String(STRING_LEN))
-    
-    def __basefn(self):
-         return '{base}/{ff}/models/{id}/'.format(base=Project.instance.project_dir,
-            ff=self.forcefield.name, id=self.msm_group_id)
-    def _default_counts_fn_(self):
-        return self.__basefn() + 'tCounts.mtx'
-    def _default_inverse_assignments_fn_(self):
-        return self.__basefn() + 'inverse_assignments.pickl'
-    def _default_assignments_fn_(self):
-        return self.__basefn() + 'assignments.h5'
+    counts_fn = Column(String(STRING_LEN))
+    assignments_fn = Column(String(STRING_LEN))
+    inverse_assignments_fn = Column(String(STRING_LEN))
     
     forcefield_id = Column(Integer, ForeignKey('forcefields.id'))
     forcefield = relationship("Forcefield", backref=backref('markov_models',
@@ -167,7 +147,6 @@ class MarkovModel(Base):
     # on a multinomial with this weight
     model_selection_weight = Column(Float)
     
-
     
     def __repr__(self):
         return "<MarkovModel(id={}, msm_group={}, forcefield={})>".format(self.id,
