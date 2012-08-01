@@ -157,7 +157,7 @@ class Builder(object):
                     return len(trajs)
                 elif key == 'TrajLengths':
                     return np.array([t.length for t in trajs])
-                raise NotImplementedError('sfd')
+                raise NotImplementedError(key)
             
             def LoadTraj(self, trj_index):
                 if trj_index < 0 or trj_index > len(trajs):
