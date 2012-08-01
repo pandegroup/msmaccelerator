@@ -151,7 +151,7 @@ class Builder(object):
         class Project(dict):
             def __init__(self):
                 self['NumTrajs'] = len(forcefield.trajectories)
-                self['TrajLengths'] = np.array([t.traj_length for t in forcefield.trajectories])
+                self['TrajLengths'] = np.array([t.length for t in forcefield.trajectories])
             
             def load_traj(self, trj_index):
                 forcefield.trajectories[trj_index].load_from_lh5()
