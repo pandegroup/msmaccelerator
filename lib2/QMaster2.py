@@ -200,7 +200,7 @@ class QMaster(threading.Thread):
         
         
         self.wq.submit(task)    
-        self.logger.info('Submitted to queue: %d', traj)
+        self.logger.info('Submitted to queue: %s', traj)
         
     def on_return(self, task):
         """Called by main thread on the return of data from the workers.
