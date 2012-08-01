@@ -216,7 +216,7 @@ class QMaster(threading.Thread):
             print conf
             print traj.dry_xtc_fn
             coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(str(traj.dry_xtc_fn), Conf=conf)
-            coordinates.SaveToLHDF(traj.lh5_fn)
+            coordinates.SaveToLHDF(str(traj.lh5_fn))
         
         except Exception as e:
             self.logger.error('When postprocessing %s, convert to lh5 failed!', traj)
