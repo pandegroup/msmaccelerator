@@ -167,6 +167,8 @@ class Builder(object):
         logger.info('Getting counts...')
         counts = self.construct_counts_matrix(assignments)
         
+        
+        raise NotImplementedError("We need to save these guys to disk")
         return MarkovModel(counts=counts, assignments=assignments, distances=distances,
             forcefield=forcefield, trajectories=trajs)
             
