@@ -159,6 +159,8 @@ class Builder(object):
                 print val
                 return val
         
+        
+        print Project().LoadTraj(1)
         logger.info('Assigning...')
         assignments, distances = assign_in_memory(self.project.metric, generators, Project())
         
