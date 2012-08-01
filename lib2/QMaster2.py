@@ -157,6 +157,17 @@ class QMaster(threading.Thread):
         traj : models.Trajectory
         """
         
+        self.db.add(traj)
+        self.db.commit()
+        traj.populate_default_filenames()
+        if not hasattr(traj, 'init_pdb'):
+            raise ValueError('Traj is supposed to have a pdb object tacked on')            
+        traj.init_pdb.SaveToPDB(traj.init_pdb_fn)
+        
+            
+            
+
+        
         remote_driver_fn = os.path.split(traj.forcefield.driver)[1]
         remote_pdb_fn = 'input.pdb'
         remote_output_fn = 'production_dry{}'.format(traj.forcefield.output_extension)

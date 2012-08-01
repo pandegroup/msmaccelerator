@@ -1,4 +1,5 @@
 # DECLARE MODELS
+import os
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (Column, Integer, String, DateTime,
@@ -60,6 +61,10 @@ class Trajectory(Base):
         return self.__basefn() + 'LastWetSnapshots/{id}.lh5'.format(id=self.id)
 
     def populate_default_filenames(self):
+        if self.id is None:
+            raise Exception(('self.id is None!. Did you forget to commit before '
+                'calling this method?'))
+                
         for name in ['init_pdb_fn', 'wqlog_fn', 'dry_xtc_fn', 'wet_xtc_fn',
             'lh5_fn', 'last_wet_snapshot_fn']:
             if getattr(self, name) is None:
@@ -67,6 +72,13 @@ class Trajectory(Base):
                 default = getattr(self, 'default_' + name)()
                 # set the field
                 setattr(self, name, default)
+                
+                #just to be safe, lets make the directories if they dont exist
+                try:
+                    os.makedirs(os.path.split(default)[0])
+                except OSError:
+                    pass
+                
                 
         
     host = Column(String(STRING_LEN))
@@ -81,7 +93,8 @@ class Trajectory(Base):
     forcefield = relationship("Forcefield", backref=backref('trajectories', order_by=id))
     
     def __repr__(self):
-        return "<Trajectory(name={})>".format(self.name)
+        return "<Trajectory(name={}, init_pdb_fn={})>".format(self.name,
+            self.init_pdb_fn)
         
     def extract_wet_frame(self, frame_index):
         """Extract a PDB of a solvated structure (single frame) in this trajectory
