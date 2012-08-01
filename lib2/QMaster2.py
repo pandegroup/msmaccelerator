@@ -171,7 +171,7 @@ class QMaster(threading.Thread):
             raise ValueError('Traj is supposed to have a pdb object tacked on')            
         traj.init_pdb.SaveToPDB(traj.init_pdb_fn)
         
-        remote_driver_fn = os.path.split(traj.forcefield.driver)[1]
+        remote_driver_fn = os.path.split(str(traj.forcefield.driver))[1]
         remote_pdb_fn = 'input.pdb'
         remote_output_fn = 'production_dry{}'.format(traj.forcefield.output_extension)
         
@@ -187,7 +187,8 @@ class QMaster(threading.Thread):
         
         traj.populate_default_filenames()
         
-        task.specify_input_file(traj.forcefield.driver, remote_driver_fn)
+        #why does traj.forcefield.driver come out as unicode?
+        task.specify_input_file(str(traj.forcefield.driver), remote_driver_fn)
         task.specify_output_file(traj.wqlog_fn, 'logs/driver.log')
         task.specify_input_file(traj.init_pdb_fn, remote_pdb_fn)
         task.specify_output_file(traj.dry_xtc_fn, remote_output_fn)

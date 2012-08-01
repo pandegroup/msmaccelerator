@@ -18,7 +18,7 @@ class ASCII(types.TypeDecorator):
         super(ASCII, self).__init__(length=500)
         
     def process_result_value(self, value, dialect):
-        if isinstance(str, basestring):
+        if isinstance(str, unicode):
             return str(value)
         return value
 
