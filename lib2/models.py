@@ -2,6 +2,7 @@
 import os
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import types
 from sqlalchemy import (Column, Integer, String, DateTime,
                         Float, ForeignKey, Table, PickleType)
 Base = declarative_base()
@@ -9,6 +10,18 @@ STRING_LEN = 500
 
 import msmbuilder.Trajectory
 from Project2 import Project
+
+
+import sqlalchemy.types as types
+
+class ASCII(types.TypeDecorator):
+    impl = types.Unicode
+    
+    def __init__(self):
+        super(ASCII, self).__init__(length=500)
+        
+    def process_result_value(self, value, dialect):
+        return str(value)
 
 class Forcefield(Base):
     """
@@ -18,11 +31,11 @@ class Forcefield(Base):
     __tablename__ = 'forcefields'
     
     id = Column(Integer, primary_key=True)
-    name = Column(String(STRING_LEN), unique=True)
-    water = Column(String(STRING_LEN))
-    driver = Column(String(STRING_LEN))
+    name = Column(ASCII, unique=True)
+    water = Column(ASCII)
+    driver = Column(ASCII)
     threads = Column(Integer)
-    output_extension = Column(String(STRING_LEN))
+    output_extension = Column(ASCII)
         
     def __repr__(self):
         return "<Forcefield(name={}, water={}, driver={})>".format(self.name,
@@ -37,12 +50,12 @@ class Trajectory(Base):
     
     id = Column(Integer, primary_key=True)
     
-    init_pdb_fn = Column(String(STRING_LEN))
-    wqlog_fn = Column(String(STRING_LEN))
-    dry_xtc_fn = Column(String(STRING_LEN))
-    wet_xtc_fn = Column(String(STRING_LEN))
-    lh5_fn = Column(String(STRING_LEN))
-    last_wet_snapshot_fn = Column(String(STRING_LEN))
+    init_pdb_fn = Column(ASCII)
+    wqlog_fn = Column(ASCII)
+    dry_xtc_fn = Column(ASCII)
+    wet_xtc_fn = Column(ASCII)
+    lh5_fn = Column(ASCII)
+    last_wet_snapshot_fn = Column(ASCII)
     
     
     def __basefn(self):
@@ -81,9 +94,9 @@ class Trajectory(Base):
                 
                 
         
-    host = Column(String(STRING_LEN))
-    mode = Column(String(STRING_LEN))
-    name = Column(String(STRING_LEN))
+    host = Column(ASCII)
+    mode = Column(ASCII)
+    name = Column(ASCII)
     returned_time = Column(Float)
     submit_time = Column(Float)
     length = Column(Integer) # in frames
@@ -136,9 +149,9 @@ class MarkovModel(Base):
     __tablename__ = 'markov_models'
     
     id = Column(Integer, primary_key=True)
-    counts_fn = Column(String(STRING_LEN))
-    assignments_fn = Column(String(STRING_LEN))
-    inverse_assignments_fn = Column(String(STRING_LEN))
+    counts_fn = Column(ASCII)
+    assignments_fn = Column(ASCII)
+    inverse_assignments_fn = Column(ASCII)
     
     forcefield_id = Column(Integer, ForeignKey('forcefields.id'))
     forcefield = relationship("Forcefield", backref=backref('markov_models',
@@ -176,7 +189,7 @@ class MSMGroup(Base):
     
     id = Column(Integer, primary_key=True)
     
-    generators_fn = Column(String(STRING_LEN))
+    generators_fn = Column(ASCII)
     microstate_selection_weights = Column(PickleType)
 
     def __repr__(self):

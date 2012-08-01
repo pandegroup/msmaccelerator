@@ -17,6 +17,8 @@ import msmbuilder.Trajectory
 import models
 from database import Session
 
+
+logger = logging.getLogger('MSMAccelerator.QMaster')
 #set_debug_flag('debug')
 #set_debug_flag('wq')
 
@@ -40,9 +42,9 @@ class QMaster(threading.Thread):
         self.wake_freq = 1 # seconds
         
         self.wq = WorkQueue(port, name='MSMAccelerator', catalog=True, exclusive=False)
-        self.logger = logging.getLogger('MSMAccelerator.QMaster')
-        self.logger.info('WORK QUEUE MASTER LISTENING ON PORT: %d', self.wq.port)
-        self.logger.info('(Start a local worker with >> work_queue_worker -d all localhost %d & )', self.wq.port)
+
+        logger.info('WORK QUEUE MASTER LISTENING ON PORT: %d', self.wq.port)
+        logger.info('(Start a local worker with >> work_queue_worker -d all localhost %d & )', self.wq.port)
         
         # method controls whether or not we need to bring back solvated_xtc as well
         if self.project.method == 'explicit':
@@ -51,7 +53,7 @@ class QMaster(threading.Thread):
             self.return_wet_xtc = False
         else:
             raise Exception("project.method must be 'explicit' or 'implicit'")
-        self.logger.info('Return wet xtc set to %s', self.return_wet_xtc)
+        logger.info('Return wet xtc set to %s', self.return_wet_xtc)
         
         # what does this specify algorithm do?
         self.wq.specify_algorithm(WORK_QUEUE_SCHEDULE_FCFS)
@@ -82,7 +84,7 @@ class QMaster(threading.Thread):
                 t = self.wq.wait(self.wake_freq)
                 if t:
                     if t.return_status != 0:
-                        self.logger.error('Worker returned nonzero exit status for job: %d', t.return_status)
+                        logger.error('Worker returned nonzero exit status for job: %d', t.return_status)
                     else:
                         self.on_return(t)
                     self._mainloop_wake_event_cause = 'job returned'
@@ -93,13 +95,13 @@ class QMaster(threading.Thread):
                 self._mainloop_wake_event.set() # also set the event if there are no tasks in the queue
 
             if self._stop.is_set():
-                self.logger.info('Recieved stop signal. Shutting down all workers')
+                logger.info('Recieved stop signal. Shutting down all workers')
                 self.wq.shutdown_workers(0) # 0 indicates to shut all of them down
                 sys.exit(0)
             
             if time.time() - last_print > self.log_freq:
-                self.logger.info('workers initialized: %d, ready: %d, busy: %d', self.wq.stats.workers_init, self.wq.stats.workers_ready, self.wq.stats.workers_busy)
-                self.logger.info('workers running: %d, waiting: %d, complete: %d', self.wq.stats.tasks_running, self.wq.stats.tasks_waiting, self.wq.stats.tasks_complete)
+                logger.info('workers initialized: %d, ready: %d, busy: %d', self.wq.stats.workers_init, self.wq.stats.workers_ready, self.wq.stats.workers_busy)
+                logger.info('workers running: %d, waiting: %d, complete: %d', self.wq.stats.tasks_running, self.wq.stats.tasks_waiting, self.wq.stats.tasks_complete)
                 last_print = time.time()
 
     def num_jobs_waiting(self):
@@ -195,19 +197,19 @@ class QMaster(threading.Thread):
             task.specify_output_file(str(traj.wet_xtc_fn), remote_wet_output_fn)
             task.specify_output_file(str(traj.last_wet_snapshot_fn), 'last_wet_snapshot.pdb')
         else:
-            self.logger.debug('Not requesting production_wet%s from driver (implicit)', traj.forcefield.output_extension)
+            logger.debug('Not requesting production_wet%s from driver (implicit)', traj.forcefield.output_extension)
         
         task.specify_tag(str(traj.id))
         task.specify_algorithm(WORK_QUEUE_SCHEDULE_FILES) # what does this do?
         
         
         self.wq.submit(task)    
-        self.logger.info('Submitted to queue: %s', traj)
+        logger.info('Submitted to queue: %s', traj)
         
     def on_return(self, task):
         """Called by main thread on the return of data from the workers.
         Post-processing"""
-        self.logger.info('Retrieved task %s', task.tag)
+        logger.info('Retrieved task %s', task.tag)
         traj = Session.query(models.Trajectory).get(int(task.tag))
         
         try:
@@ -219,9 +221,9 @@ class QMaster(threading.Thread):
             coordinates.SaveToLHDF(str(traj.lh5_fn))
         
         except Exception as e:
-            self.logger.error('When postprocessing %s, convert to lh5 failed!', traj)
-            self.logger.exception(e)
+            logger.error('When postprocessing %s, convert to lh5 failed!', traj)
+            logger.exception(e)
             raise
         
         traj.length = len(coordinates)
-        self.logger.info('Finished converting new traj to lh5 sucessfully')
+        logger.info('Finished converting new traj to lh5 sucessfully')
