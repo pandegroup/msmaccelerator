@@ -11,11 +11,8 @@ STRING_LEN = 500
 import msmbuilder.Trajectory
 from Project2 import Project
 
-
-import sqlalchemy.types as types
-
 class ASCII(types.TypeDecorator):
-    impl = types.Unicode
+    impl = types.String
     
     def __init__(self):
         super(ASCII, self).__init__(length=500)
