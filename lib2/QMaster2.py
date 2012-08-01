@@ -217,7 +217,7 @@ class QMaster(threading.Thread):
             coordinates.SaveToLHDF(traj.lh5_fn)
         
         except Exception as e:
-            self.logger.error('When postprocessing %s, convert to lh5 failed!', t)
+            self.logger.error('When postprocessing %s, convert to lh5 failed!', traj)
             self.logger.exception(e)
             raise
         
