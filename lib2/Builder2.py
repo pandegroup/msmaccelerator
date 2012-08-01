@@ -150,10 +150,14 @@ class Builder(object):
         # so, lets spoof it
         trajs = Session.query(Trajectory).filter(Trajectory.returned_time != None).all()
         
-        class Project(dict):
-            def __init__(self):
-                self['NumTrajs'] = len(trajs)
-                self['TrajLengths'] = np.array([t.length for t in trajs])
+        class BuilderProject(object):
+            
+            def __getitem__(self, key):
+                if key == 'NumTrajs':
+                    return len(trajs)
+                elif key == 'TrajLengths'
+                    return np.array([t.length for t in trajs])
+                raise NotImplementedError('sfd')
             
             def LoadTraj(self, trj_index):
                 if trj_index < 0 or trj_index > len(trajs):
@@ -165,7 +169,7 @@ class Builder(object):
         
         
         logger.info('Assigning...')
-        assignments, distances = assign_in_memory(self.project.metric, generators, Project())
+        assignments, distances = assign_in_memory(self.project.metric, generators, BuilderProject())
         
         logger.info('Getting counts...')
         counts = self.construct_counts_matrix(assignments)
