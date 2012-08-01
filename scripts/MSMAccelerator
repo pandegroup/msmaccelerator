@@ -66,7 +66,7 @@ def main():
             if cause == 'queue empty':
                 logger.info('Generating new job for round {0}'.format(builder.n_rounds))
                 # build from round_num - 1, since that is the last completed round
-                qmaster.submit(brain.generate_job())
+                qmaster.submit(*brain.generate_job())
             
             cause = qmaster.wait()
             logger.info('Wakeup Cause: {0}'.format(cause))
