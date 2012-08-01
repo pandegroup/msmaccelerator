@@ -72,7 +72,7 @@ class Brain(object):
             
         if forcefield == model_to_draw_from.forcefield:
             # we're shooting in the same forcefield the conf was generated in
-            return Trajectory(
+            t = Trajectory(
                 init_pdb=conf,
                 forcefield=forcefield,
                 name='Started from round {}, microstate {} (ff {}, trj {}, frame {}) -- continuing in same ff'.format(build_round.id,
@@ -84,12 +84,16 @@ class Brain(object):
             # ======
             # SHOULD WE DO EQUILIBRATION INSTEAD OF PRODUCTION?
             # ======
-            return Trajectory(
+            t = Trajectory(
                 init_pdb=conf,
                 forcefield=forcefield,
                 name='Started from round {}, microstate {} (ff {}, trj {}, frame {}) -- switching forcfields'.format(build_round.id,
                     selected_microstate, model_to_draw_from.forcefield.name, trj_i, frame_i),
                 mode='Production')
+                
+        self.db.add(t)
+        self.db.flush()
+        return t.id
                 
         
     def _generate_equilibration_job(self):
@@ -131,7 +135,9 @@ class Brain(object):
         trj = Trajectory(forcefield=forcefield,
             name=name, mode='Equilibration')
         trj.init_pdb = conf
-        
-        return trj
+        self.db.add(trj)
+        self.db.flush()
+
+        return trj.id
         
         
