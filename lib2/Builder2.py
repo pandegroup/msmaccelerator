@@ -157,7 +157,7 @@ class Builder(object):
                 forcefield.trajectories[trj_index].load_from_lh5()
         
         logger.info('Assigning...')
-        assignments, distances = assign_in_memory(metric, generators, Project())
+        assignments, distances = assign_in_memory(self.project.metric, generators, Project())
         
         logger.info('Getting counts...')
         counts = self.construct_counts_matrix(assignments)
