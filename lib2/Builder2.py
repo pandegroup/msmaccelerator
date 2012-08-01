@@ -95,8 +95,8 @@ class Builder(object):
         generators = self.joint_clustering()
         
         msmgroup = MSMGroup()
-        for msm in Session.query(Forcefield).all():
-            msm = self.build_msm(forcefield, generators=generators)
+        for ff in Session.query(Forcefield).all():
+            msm = self.build_msm(ff, generators=generators)
             msmgroup.markov_models.append(msm)
         
         Session.add(msmgroup)
