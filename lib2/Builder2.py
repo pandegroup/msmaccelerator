@@ -153,7 +153,7 @@ class Builder(object):
                 self['NumTrajs'] = len(forcefield.trajectories)
                 self['TrajLengths'] = np.array([t.length for t in forcefield.trajectories])
             
-            def load_traj(self, trj_index):
+            def LoadTraj(self, trj_index):
                 val = msmbuilder.Trajectory.LoadTrajectoryFile(forcefield.trajectories[trj_index].lh5_fn)
                 print 'LOAD TRAJ {}'.format(trj_index)
                 print val
