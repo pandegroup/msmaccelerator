@@ -218,8 +218,8 @@ class QMaster(threading.Thread):
         try:
             # save lh5 version of the trajectory
             conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
-            coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(traj.dry_xtc_fn, Conf=conf)
-            coordinates.SaveToLHDF(traj.lh5_fn)
+            coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(str(traj.dry_xtc_fn), Conf=conf)
+            coordinates.SaveToLHDF(str(traj.lh5_fn))
         
         except Exception as e:
             logger.error('When postprocessing %s, convert to lh5 failed!', traj)

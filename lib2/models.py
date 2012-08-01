@@ -80,7 +80,6 @@ class Trajectory(Base):
         for name in ['init_pdb_fn', 'wqlog_fn', 'dry_xtc_fn', 'wet_xtc_fn',
             'lh5_fn', 'last_wet_snapshot_fn']:
             if getattr(self, name) is None:
-                print 'setting {}'.format(name)
                 # call the method
                 default = getattr(self, 'default_' + name)()
                 # set the field
