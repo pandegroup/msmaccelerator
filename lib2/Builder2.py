@@ -152,9 +152,9 @@ class Builder(object):
         
         class BuilderProject(dict):
             
-            def __init__(self):
-                self['NumTrajs'] = len(trajs)
-                self['TrajLengths'] = np.array([t.length for t in trajs])
+            #def __init__(self):
+            #    self['NumTrajs'] = len(trajs)
+            #    self['TrajLengths'] = np.array([t.length for t in trajs])
             
             def LoadTraj(self, trj_index):
                 if trj_index < 0 or trj_index > len(trajs):
