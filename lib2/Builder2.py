@@ -156,6 +156,7 @@ class Builder(object):
             def LoadTraj(self, trj_index):
                 if trj_index < 0 or trj_index > len(forcefield.trajectories):
                     raise IOError("Not that many!")
+                print forcefield.trajectories[trj_index]
                 print 'loading from' + str(forcefield.trajectories[trj_index].lh5_fn)
                 val = msmbuilder.Trajectory.LoadTrajectoryFile(str(forcefield.trajectories[trj_index].lh5_fn))
                 print 'LOAD TRAJ {}'.format(trj_index)
