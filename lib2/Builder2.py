@@ -154,7 +154,9 @@ class Builder(object):
                 self['TrajLengths'] = np.array([t.length for t in forcefield.trajectories])
             
             def LoadTraj(self, trj_index):
-                val = msmbuilder.Trajectory.LoadTrajectoryFile(forcefield.trajectories[trj_index].lh5_fn)
+                if trj_index < 0 or trj_index > len(forcefield.trajectories):
+                    raise IOError("Not that many!")
+                val = msmbuilder.Trajectory.LoadTrajectoryFile(str(forcefield.trajectories[trj_index].lh5_fn))
                 print 'LOAD TRAJ {}'.format(trj_index)
                 print val
                 return val
