@@ -155,6 +155,7 @@ class Builder(object):
             
             def load_traj(self, trj_index):
                 val = msmbuilder.Trajectory.LoadTrajectoryFile(forcefield.trajectories[trj_index].lh5_fn)
+                print 'LOAD TRAJ {}'.format(trj_index)
                 print val
                 return val
         
