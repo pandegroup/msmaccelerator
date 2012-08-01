@@ -15,6 +15,7 @@ from msmbuilder.assigning import assign_in_memory
 
 from models import Trajectory, Forcefield, MarkovModel, MSMGroup
 from database import Session
+logger = logging.getLogger('MSMAccelerator.Builder')
 
 class Builder(object):
     """
@@ -24,7 +25,6 @@ class Builder(object):
     
     def __init__(self, project):
         self.project = project
-        self.logger = logging.getLogger('MSMAccelerator.Builder')
     
     @property
     def n_rounds(self):
@@ -62,7 +62,7 @@ class Builder(object):
         
         truth = n_total > n_built + self.project.num_trajs_sufficient_for_round
         
-        self.logger.info("%d trajs total, %d trajs built. Sufficient? %s", n_total, n_built, truth)
+        logger.info("%d trajs total, %d trajs built. Sufficient? %s", n_total, n_built, truth)
         return truth
     
     
@@ -85,11 +85,11 @@ class Builder(object):
         """
         
         if checkdata:
-            self.logger.info("Checking if sufficient data has been acquired.")
+            logger.info("Checking if sufficient data has been acquired.")
             if not self.is_sufficient_new_data():
                 return False
         else:
-            self.logger.info("Skipping check for adequate data.")
+            logger.info("Skipping check for adequate data.")
         
         # use all the data together to get the cluster centers
         generators = self.joint_clustering()
@@ -101,7 +101,7 @@ class Builder(object):
         
         Session.add(msmgroup)
         Session.flush()
-        self.logger.info("Round completed sucessfully")
+        logger.info("Round completed sucessfully")
         
         return True
         
@@ -113,7 +113,7 @@ class Builder(object):
         -------
         generators : msmbuilder.Trajectory
         """
-        self.logger.info('Running joint clustering')
+        logger.info('Running joint clustering')
         
         # load up all the trajs in the database
         db_trajs = Session.query(Trajectory).filter(Trajectory.returned_time != None).all()
@@ -156,10 +156,10 @@ class Builder(object):
             def load_traj(self, trj_index):
                 forcefield.trajectories[trj_index].load_from_lh5()
         
-        self.project.info('Assigning...')
+        logger.info('Assigning...')
         assignments, distances = assign_in_memory(metric, generators, Project())
         
-        self.project.info('Getting counts...')
+        logger.info('Getting counts...')
         counts = self.construct_counts_matrix(assignments)
         
         return MarkovModel(counts=counts, assignments=assignments, distances=distances,
@@ -188,19 +188,19 @@ class Builder(object):
                 ApplyMappingToAssignments(assignments, mapping)
                 counts = ergodic_counts
             except Exception as e:
-                self.logger.warning("ErgodicTrim failed with message '{0}'".format(e))
+                logger.warning("ErgodicTrim failed with message '{0}'".format(e))
         else:
-            self.logger.info("Ignoring ergodic trimming")
+            logger.info("Ignoring ergodic trimming")
             counts = raw_counts
         
         if self.project.symmetrize == 'transpose':
-            self.logger.debug('Transpose symmetrizing')
+            logger.debug('Transpose symmetrizing')
             counts = counts + counts.T
         elif self.project.symmetrize == 'mle':
-            self.logger.debug('MLE symmetrizing')
+            logger.debug('MLE symmetrizing')
             counts = EstimateReversibleCountMatrix(counts)
         elif self.project.symmetrize == 'none' or self.project.symmetrize == None:
-            self.logger.debug('Skipping symmetrization')
+            logger.debug('Skipping symmetrization')
         else:
             raise ValueError("Could not understand symmetrization method: %s" % self.project.symmetrize)
         
