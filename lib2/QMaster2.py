@@ -15,6 +15,7 @@ import logging
 
 import msmbuilder.Trajectory
 import models
+from database import Session
 
 #set_debug_flag('debug')
 #set_debug_flag('wq')
@@ -34,7 +35,6 @@ class QMaster(threading.Thread):
         
         threading.Thread.__init__(self)
         self.project = project
-        self.db = self.project.db
         
         self.log_freq = log_freq  # print time in seconds
         self.wake_freq = 1 # seconds
@@ -73,6 +73,7 @@ class QMaster(threading.Thread):
     def run(self):
         """Main thread-loop for the QMaster thread"""
         last_print = time.time()
+        
         
         while True:
             time.sleep(self.wake_freq)
@@ -150,24 +151,21 @@ class QMaster(threading.Thread):
             raise Exception('Bad wakeup cause')
         return cause
     
-    def submit(self, traj_id, init_pdb):
+    def submit(self, traj):
         """ Submit a job to the work-queue for further sampling.
         
         Parameters
         ----------
-        traj_id : int
-            the id of the trajectory to submit to the work_queue
-        init_pdb : msmbuilder.Trajectory
-            a pdb file
         """
-        
-        traj = self.db.query(models.Trajectory).get(traj_id)
-        if traj is None:
-            raise ValueError("This traj (id={}) does not exist.".format(traj_id))
         if traj.submit_time is not None:
             raise ValueError("This traj has already been submitted")
+        Session.commit()
         traj.populate_default_filenames()
-        init_pdb.SaveToPDB(traj.init_pdb_fn)
+        
+        
+        if not hasattr(traj, 'init_pdb'):
+            raise ValueError('Traj is supposed to have a pdb object tacked on')            
+        traj.init_pdb.SaveToPDB(traj.init_pdb_fn)
         
         remote_driver_fn = os.path.split(traj.forcefield.driver)[1]
         remote_pdb_fn = 'input.pdb'
@@ -210,7 +208,7 @@ class QMaster(threading.Thread):
         """Called by main thread on the return of data from the workers.
         Post-processing"""
         self.logger.info('Retrieved task %s', task.tag)
-        traj = self.db.query(models.Trajectory).get(int(task.tag))
+        traj = Session.query(models.Trajectory).get(int(task.tag))
         
         try:
             # save lh5 version of the trajectory

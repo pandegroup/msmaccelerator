@@ -14,6 +14,7 @@ import msmbuilder.Serializer
 from msmbuilder.assigning import assign_in_memory
 
 from models import Trajectory, Forcefield, MarkovModel, MSMGroup
+from database import Session
 
 class Builder(object):
     """
@@ -23,12 +24,11 @@ class Builder(object):
     
     def __init__(self, project):
         self.project = project
-        self.db = project.connect_to_db()
         self.logger = logging.getLogger('MSMAccelerator.Builder')
     
     @property
     def n_rounds(self):
-        return self.db.query(MSMGroup).count()
+        return Session.query(MSMGroup).count()
         
     def is_sufficient_new_data(self):
         """Is there sufficient new data to build a new round?
@@ -40,18 +40,18 @@ class Builder(object):
         """
         
         # get most recent set of MSMs built
-        msmgroup = self.db.query(MSMGroup).order_by(MSMGroup.id.desc()).first()
+        msmgroup = Session.query(MSMGroup).order_by(MSMGroup.id.desc()).first()
         
         # the number of unique trajectories that are part of this msmgroup
         # by constructing a query for the union of trajectories in any of the msms
         # in the msm group
-        q = self.db.query(Trajectory)
+        q = Session.query(Trajectory)
         for msm in msmgroup.markov_models:
-            q.union(self.db.query(Trajectory).filter(Trajectory.markov_models.contains(msm)))
+            q.union(Session.query(Trajectory).filter(Trajectory.markov_models.contains(msm)))
         n_built = q.count()
         
         # number of trajs in the database
-        n_total = self.db.query(Trajectory).count()
+        n_total = Session.query(Trajectory).count()
         
         truth = n_built + self.project.num_trajs_sufficient_for_round > n_total
         
@@ -88,12 +88,12 @@ class Builder(object):
         generators = self.joint_clustering()
         
         msmgroup = MSMGroup()
-        for msm in self.db.query(Forcefields).all():
+        for msm in Session.query(Forcefields).all():
             msm = self.build_msm(forcefield, generators=generators)
             msmgroup.markov_models.append(msm)
         
-        self.db.add(msmgroup)
-        self.db.commit()
+        Session.add(msmgroup)
+        Session.flush()
         self.logger.info("Round completed sucessfully")
         
         return True
@@ -109,7 +109,7 @@ class Builder(object):
         self.logger.info('Running joint clustering')
         
         # load up all the trajs in the database
-        db_trajs = self.db.query(Trajectories).all()
+        db_trajs = Session.query(Trajectories).all()
         
         # load the xyz coordinates from disk for each trajectory
         loaded_trjs = [t.load_from_lh5(self.project.stride) for q in db_trajs]

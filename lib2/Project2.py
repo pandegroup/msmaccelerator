@@ -8,10 +8,10 @@ import numpy as np
 from msmbuilder import metrics, clustering
 from msmbuilder.Trajectory import Trajectory
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
 import models
 from utils import Singleton
+from database import Session
 
 #
 # SINGLETON OBJECT
@@ -87,23 +87,19 @@ class Project(object):
         if not os.path.exists(self.project_dir):
             os.makedirs(self.project_dir)
             
-        self.connect_to_db()
+        self.__connect_to_db()
         self.add_forcefields_to_db(params['forcefields'])
         
 
-    def connect_to_db(self):        
-        if not hasattr(self, 'db') or self.db is None:
-            db_path =  os.path.join(self.project_dir, 'db.sqlite')
-            self.engine = create_engine('sqlite:///{}'.format(db_path), echo=False)
+    def __connect_to_db(self):       
+        db_path =  os.path.join(self.project_dir, 'db.sqlite')
+        engine = create_engine('sqlite:///{}'.format(db_path), echo=False)
+        Session.configure(bind=engine)
+        models.Base.metadata.create_all(engine) 
         
-            Session = sessionmaker(bind=self.engine)
-            self.db = Session()
-            models.Base.metadata.create_all(self.engine) 
-                
-        return self.db
         
     def add_forcefields_to_db(self, p):
-        if self.db.query(models.Forcefield).count() == 0:
+        if Session.query(models.Forcefield).count() == 0:
             # add forcefields
             for ff in p:
                 obj = models.Forcefield(name=ff['name'], water=ff['water'],
@@ -111,9 +107,9 @@ class Project(object):
                     output_extension=ff['output_extension'],
                     threads=ff['threads'])
                     
-                self.db.add(obj)
+                Session.add(obj)
 
-            self.db.commit()
+            Session.commit()
 
         else:
             print "NOTE: I'M NOT PARSING NEW FORCEFIELDS"

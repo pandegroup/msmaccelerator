@@ -13,6 +13,7 @@ from collections import defaultdict
 import Sampling
 from utils import lru_cache
 from models import Trajectory, Forcefield, MarkovModel, MSMGroup
+from database import Session
 
 def multinomial(weights):
     return np.where(np.random.multinomial(n=1, pvals=weights))[0][0]
@@ -22,7 +23,6 @@ class Brain(object):
     def __init__(self, project):
         self.logger = logging.getLogger('MSMAccelerator.Brain')
         self.project = project
-        self.db = project.db
         
     #     # overwrite method
     #     self.adaptive_sampling = getattr(Sampling, project.adaptive_sampling)
@@ -45,7 +45,7 @@ class Brain(object):
         """
         
         # get the most recent build round
-        msmgroup = self.db.query(MSMGroup).order_by(MSMGroup.id.desc()).first()
+        msmgroup = Session.query(MSMGroup).order_by(MSMGroup.id.desc()).first()
         if msmgroup is None:
             return self._generate_equilibration_job()
         
@@ -73,7 +73,6 @@ class Brain(object):
         if forcefield == model_to_draw_from.forcefield:
             # we're shooting in the same forcefield the conf was generated in
             t = Trajectory(
-                init_pdb=conf,
                 forcefield=forcefield,
                 name='Started from round {}, microstate {} (ff {}, trj {}, frame {}) -- continuing in same ff'.format(build_round.id,
                     selected_microstate, model_to_draw_from.forcefield.name, trj_i, frame_i),
@@ -85,15 +84,13 @@ class Brain(object):
             # SHOULD WE DO EQUILIBRATION INSTEAD OF PRODUCTION?
             # ======
             t = Trajectory(
-                init_pdb=conf,
                 forcefield=forcefield,
                 name='Started from round {}, microstate {} (ff {}, trj {}, frame {}) -- switching forcfields'.format(build_round.id,
                     selected_microstate, model_to_draw_from.forcefield.name, trj_i, frame_i),
                 mode='Production')
-                
-        self.db.add(t)
-        self.db.flush()
-        return t.id
+         
+        t.init_pdb = conf
+        return t 
                 
         
     def _generate_equilibration_job(self):
@@ -130,13 +127,11 @@ class Brain(object):
             self.logger.info('Using frame %s of starting_confs_lh5 (%s) to start equilibration run' % (r, self.project.starting_confs_lh5))
             name = 'equilibration, starting from frame %s of starting_confs_lh5 (%s)' %  (r, self.project.starting_confs_lh5) 
         
-        forcefield = self.db.query(Forcefield).first()
+        forcefield = Session.query(Forcefield).first()
         
         trj = Trajectory(forcefield=forcefield,
             name=name, mode='Equilibration')
-        self.db.add(trj)
-        self.db.flush()
-
-        return trj.id, conf
+        trj.init_pdb = conf
+        return trj
         
         
