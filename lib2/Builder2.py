@@ -150,7 +150,7 @@ class Builder(object):
         # so, lets spoof it
         trajs = Session.query(Trajectory).filter(Trajectory.returned_time != None).all()
         
-        class BuilderProject(object):
+        class BuilderProject(dict):
             def __init__(self):
                 self['NumTrajs'] = len(trajs)
                 self['TrajLengths'] = np.array([t.length for t in trajs])
