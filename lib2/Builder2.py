@@ -41,21 +41,28 @@ class Builder(object):
         
         # get most recent set of MSMs built
         msmgroup = Session.query(MSMGroup).order_by(MSMGroup.id.desc()).first()
-        
-        # the number of unique trajectories that are part of this msmgroup
-        # by constructing a query for the union of trajectories in any of the msms
-        # in the msm group
-        q = Session.query(Trajectory)
-        for msm in msmgroup.markov_models:
-            q.union(Session.query(Trajectory).filter(Trajectory.markov_models.contains(msm)))
-        n_built = q.count()
+        if msmgroup is None:
+            n_built = 0
+        else:        
+            # the number of unique trajectories that are part of this msmgroup
+            # by constructing a query for the union of trajectories in any of the msms
+            # in the msm group
+            q = Session.query(Trajectory)
+            for msm in msmgroup.markov_models:
+                q2 = Session.query(Trajectory)
+                q2.filter(Trajectory.markov_models.contains(msm))
+                q2.filter(Trajectory.returned_time != None)
+                q.union(q2)
+            n_built = q.count()
+            print q.all()
+            ei
         
         # number of trajs in the database
-        n_total = Session.query(Trajectory).count()
+        n_total = Session.query(Trajectory).filter(Trajectory.returned_time != None).count()
         
-        truth = n_built + self.project.num_trajs_sufficient_for_round > n_total
+        truth = n_total > n_built + self.project.num_trajs_sufficient_for_round
         
-        self.logger.info("{} trajs total, {} trajs built".format(n_total, n_built))
+        self.logger.info("%d trajs total, %d trajs built. Sufficient? %s", n_total, n_built, truth)
         return truth
     
     
@@ -81,8 +88,8 @@ class Builder(object):
             self.logger.info("Checking if sufficient data has been acquired.")
             if not self.is_sufficient_new_data():
                 return False
-        
-        self.logger.info("Skipping check for adequate data.")
+        else:
+            self.logger.info("Skipping check for adequate data.")
         
         # use all the data together to get the cluster centers
         generators = self.joint_clustering()
@@ -109,10 +116,13 @@ class Builder(object):
         self.logger.info('Running joint clustering')
         
         # load up all the trajs in the database
-        db_trajs = Session.query(Trajectories).all()
+        db_trajs = Session.query(Trajectory).filter(Trajectory.returned_time != None).all()
+        if len(db_trajs) == 0:
+            raise RuntimeError()
         
         # load the xyz coordinates from disk for each trajectory
-        loaded_trjs = [t.load_from_lh5(self.project.stride) for q in db_trajs]
+        load = lambda v: msmbuilder.Trajectory.LoadTrajectoryFile(v)
+        loaded_trjs = [load(t.lh5_fn)[::self.project.stride] for t in db_trajs]
         
         clusterer = self.project.clusterer(trajectories=loaded_trjs)
         return clusterer.get_generators_as_traj()

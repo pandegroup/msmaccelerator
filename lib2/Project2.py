@@ -81,6 +81,7 @@ class Project(object):
         self.adaptive_sampling = params['adaptive_sampling']
         self.n_rounds = params['num_rounds']
         self.project_dir = params['project_dir']
+        self.num_trajs_sufficient_for_round = params['num_trajs_sufficient_for_round']
 
         if not self.method in ['implicit', 'explicit']:
             raise ValueError()
