@@ -3,9 +3,11 @@ forcefields:
     water: tip3p
     driver: test_driver.py
     output_extension: .xtc
+    threads: 8
   - name: amber99sb-ildn
     water: tip3p
     driver: test_driver.py
+    threads: 8
     output_extension: .xtc
     
 pdb_topology_file: ala5.pdb

@@ -80,7 +80,7 @@ class QMaster(threading.Thread):
                 t = self.wq.wait(self.wake_freq)
                 if t:
                     if t.return_status != 0:
-                        self.logger.error('Worker returned nonzero exit status for job: {0}'.format(str(job_dict)))
+                        self.logger.error('Worker returned nonzero exit status for job: {0}'.format(t.return_status))
                     else:
                         self.on_return(t)
                     self._mainloop_wake_event_cause = 'job returned'
@@ -163,10 +163,6 @@ class QMaster(threading.Thread):
         if not hasattr(traj, 'init_pdb'):
             raise ValueError('Traj is supposed to have a pdb object tacked on')            
         traj.init_pdb.SaveToPDB(traj.init_pdb_fn)
-        
-            
-            
-
         
         remote_driver_fn = os.path.split(traj.forcefield.driver)[1]
         remote_pdb_fn = 'input.pdb'

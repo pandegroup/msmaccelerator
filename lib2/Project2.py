@@ -108,7 +108,8 @@ class Project(object):
             for ff in p:
                 obj = models.Forcefield(name=ff['name'], water=ff['water'],
                     driver=os.path.join(self.params_dir, ff['driver']),
-                    output_extension=ff['output_extension'])
+                    output_extension=ff['output_extension'],
+                    threads=ff['threads'])
                     
                 self.db.add(obj)
 
