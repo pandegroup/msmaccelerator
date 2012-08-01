@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test
+END
+test_20.cand.right
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/test_20.cand.right
+END
+test_example.sh
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/test_example.sh
+END
+test_20.sw.right
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/test_20.sw.right
+END
+test_20.fa
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/test_20.fa
+END
+TR_001_test_example.sh
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/TR_001_test_example.sh
+END
+test_20.banded.right
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/test_20.banded.right
+END
+TR_002_test_example.sh
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/TR_002_test_example.sh
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/Makefile
+END
+README
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/README
+END

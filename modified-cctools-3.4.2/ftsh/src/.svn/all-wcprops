@@ -1,0 +1,179 @@
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src
+END
+parser.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/parser.h
+END
+scanner.l
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/scanner.l
+END
+ast_print.c
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ast_print.c
+END
+ftsh.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ftsh.c
+END
+timed_exec.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/timed_exec.c
+END
+builtin.c
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/builtin.c
+END
+ast_print.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ast_print.h
+END
+ast_execute.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ast_execute.c
+END
+buffer.c
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/buffer.c
+END
+timed_exec.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/timed_exec.h
+END
+multi_fork.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/multi_fork.c
+END
+builtin.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/builtin.h
+END
+ftsh_error.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ftsh_error.c
+END
+ast_execute.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ast_execute.h
+END
+buffer.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/buffer.h
+END
+expr.c
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/expr.c
+END
+multi_fork.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/multi_fork.h
+END
+ast_parse.c
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ast_parse.c
+END
+ftsh_error.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ftsh_error.h
+END
+parser.y
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/parser.y
+END
+expr.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/expr.h
+END
+cancel.c
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/cancel.c
+END
+variable.c
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/variable.c
+END
+ast_parse.h
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ast_parse.h
+END
+ast.c
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ast.c
+END
+cancel.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/cancel.h
+END
+variable.h
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/variable.h
+END
+ast.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/ast.h
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/ftsh/src/Makefile
+END

@@ -1,0 +1,66 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html><head><title>makeflow_blast(1)</title></head><body><h1>makeflow_blast(1)</h1>
+
+<h2>NAME</h2> 
+<b>makeflow_blast</b> - Generate a Makeflow to parallelize and distribute blastall jobs 
+
+<h2>SYNOPSIS</h2>
+<tt><b>makeflow_blast query_granularity character_granularity [blast_options]</b></tt>
+
+<h2>DESCRIPTION</h2>
+<b>makeflow_blast</b> is a script to generate <a href=makeflow.html>makeflow()</a> workflows to execute blastall jobs. Essentially, the script uses query_granularity (the maximum number of sequences per fasta file split) and character_granularity (the maximum number of characters per fasta file split) to determine how to break up the input fasta file.  It then creates a makeflow that will execute a blastall with the desired parameters on each part and concatenate the results into the desired output file.  For simplicity, all of the arguments following query_granularity and character_granularity are passed through as the options to <a href=blastall.html>blastall()</a>.
+<p>
+<b>makeflow_blast</b> executes a small test BLAST job with the user provided parameters in order to be sure that the given parameters are sane.  It then calculates the number of parts the provided fasta input file will require, prints a makeflow rule to generate those parts using <a href=split_fasta.html>split_fasta()</a>, and enumerates makeflow rules to execute blastall with the given parameters on each part. Subsequent rules to condense and clean the intermediate input and output are then produced.
+<p>
+<b>makeflow_blast</b> expects a blastall in the path, and should be used from the directory containing the input files and databases.  For distribution convenience, it is required that the files constituting a given BLAST database must be stored in a folder with the same name as that database.
+
+<h2>OPTIONS</h2>
+<table>
+<tr><td colspan=2> <b><tt>-i <i>&lt;input&gt;</i></tt></b><tr><td><td>Specifiy the input fasta file for querying the BLAST database
+<tr><td colspan=2> <b><tt>-o <i>&lt;output&gt;</i></tt></b><tr><td><td>Specify the output file for final results
+<tr><td colspan=2> <b><tt>-d <i>&lt;databse&gt;</i></tt></b><tr><td><td>Specify the BLAST database to be queried
+</table>
+
+<h2>EXIT STATUS</h2>
+On success, returns zero.  On failure, returns non-zero.
+
+<h2>ENVIRONMENT VARIABLES</h2>
+
+<h2>EXAMPLES</h2>
+
+To generate a makeflow to run blastall -p blastn on smallpks.fa and testdb, splitting smallpks.fa every 500 sequences or 10000 characters and placing the blast output into test.txt do:
+<pre>
+python makeflow_blast 500 10000 -i smallpks.fa -o test -d testdb/testdb -p blastn > Makeflow
+</pre>
+You can then execute this workflow in a variety of distributed and parallel environments using the makeflow command.
+
+<h2>COPYRIGHT</h2>
+
+The Cooperative Computing Tools are Copyright (C) 2003-2004 Douglas Thain and Copyright (C) 2005-2011 The University of Notre Dame.  This software is distributed under the GNU General Public License.  See the file COPYING for details.
+
+<h2>SEE ALSO</h2>
+
+<dir>
+<li> <a href="../index.html">Cooperative Computing Tools Documentation</a>
+<li> <a href="../makeflow.html">Makeflow User Manual</a>
+<li> <a href=makeflow.html>makeflow(1)</a>
+<li> <a href=makeflow_monitor.html>makeflow_monitor(1)</a>
+<li> <a href=starch.html>starch(1)</a>
+</dir>
+
+<p><hr>CCTools 3.4.2 released on 02/10/2012</body></html>
+

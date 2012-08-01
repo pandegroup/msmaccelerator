@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/svn/monakos/!svn/ver/108/cluster-tools
+END
+HOWTO
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/svn/monakos/!svn/ver/103/cluster-tools/HOWTO
+END
+autoinstall_ec2.sh
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/monakos/!svn/ver/103/cluster-tools/autoinstall_ec2.sh
+END
+pbs_submit_workers
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/monakos/!svn/ver/108/cluster-tools/pbs_submit_workers
+END
+autoinstall_linux.sh
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/monakos/!svn/ver/107/cluster-tools/autoinstall_linux.sh
+END

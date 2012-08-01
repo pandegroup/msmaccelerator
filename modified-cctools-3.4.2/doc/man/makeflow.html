@@ -1,0 +1,154 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html><head><title>makeflow(1)</title></head><body><h1>makeflow(1)</h1>
+
+<h2>NAME</h2>
+<b>makeflow</b> - workflow engine for executing distributed workflows
+
+<h2>SYNOPSIS</h2>
+<tt><b>makeflow [options] <i>&lt;dagfile&gt;</i></b></tt>
+
+<h2>DESCRIPTION</h2>
+
+<b>Makeflow</b> is a workflow engine for distributed computing. It accepts a
+specification of a large amount of work to be performed, and runs it on remote
+machines in parallel where possible. In addition, <b>Makeflow</b> is
+fault-tolerant, so you can use it to coordinate very large tasks that may run
+for days or weeks in the face of failures. <b>Makeflow</b> is designed to be
+similar to Make, so if you can write a Makefile, then you can write a
+<b>Makeflow</b>.
+
+<p>
+
+You can run a <b>Makeflow</b> on your local machine to test it out. If you have
+a multi-core machine, then you can run multiple tasks simultaneously. If you
+have a Condor pool or a Sun Grid Engine batch system, then you can send your
+jobs there to run. If you don't already have a batch system, <b>Makeflow</b>
+comes with a system called Work Queue that will let you distribute the load
+across any collection of machines, large or small.
+
+<h2>OPTIONS</h2>
+When <tt>makeflow</tt> is ran without arguments, it will attempt to execute the
+workflow specified by the <b>Makeflow</b> dagfile using the <tt>local</tt>
+execution engine.
+
+<h3>Commands</h3>
+<table>
+<tr><td> <b><tt>-c</tt></b> <td>Clean up: remove logfile and all targets.
+<tr><td> <b><tt>-D</tt></b> <td>Display the Makefile as a Dot graph.
+<tr><td> <b><tt>-k</tt></b> <td>Syntax check.
+<tr><td> <b><tt>-h</tt></b> <td>Show this help screen.
+<tr><td> <b><tt>-I</tt></b> <td>Show input files.
+<tr><td> <b><tt>-O</tt></b> <td>Show output files.
+<tr><td> <b><tt>-v</tt></b> <td>Show version string.
+</table>
+
+<h3>Batch Options</h3>
+<table>
+<tr><td colspan=2> <b><tt>-B <i>&lt;options&gt;</i></tt></b><tr><td><td>Add these options to all batch submit files.
+<tr><td colspan=2> <b><tt>-j <i>&lt;#&gt;</i></tt></b><tr><td><td>Max number of local jobs to run at once. (default is # of cores)
+<tr><td colspan=2> <b><tt>-J <i>&lt;#&gt;</i></tt></b><tr><td><td>Max number of remote jobs to run at once. (default is 100)
+<tr><td colspan=2> <b><tt>-l <i>&lt;logfile&gt;</i></tt></b><tr><td><td>Use this file for the makeflow log. (default is X.makeflowlog)
+<tr><td colspan=2> <b><tt>-L <i>&lt;logfile&gt;</i></tt></b><tr><td><td>Use this file for the batch system log. (default is X.<i>&lt;type&gt;</i>log)
+<tr><td colspan=2> <b><tt>-r <i>&lt;n&gt;</i></tt></b><tr><td><td>Automatically retry failed batch jobs up to n times.
+<tr><td colspan=2> <b><tt>-S <i>&lt;timeout&gt;</i></tt></b><tr><td><td>Time to retry failed batch job submission. (default is 3600s)
+<tr><td colspan=2> <b><tt>-T <i>&lt;type&gt;</i></tt></b><tr><td><td>Batch system type: local, condor, sge, moab, wq, hadoop, mpi-queue. (default is local)
+</table>
+
+<h3>Debugging Options</h3>
+<table>
+<tr><td colspan=2> <b><tt>-d <i>&lt;subsystem&gt;</i></tt></b><tr><td><td> Enable debugging for this subsystem.
+<tr><td colspan=2> <b><tt>-o <i>&lt;file&gt;</i></tt></b><tr><td><td> Send debugging to this file.
+</table>
+
+<h3>WorkQueue Options</h3>
+<table>
+<tr><td> <b><tt>-a</tt></b> <td>Advertise the master information to a catalog server.
+<tr><td colspan=2> <b><tt>-C <i>&lt;catalog&gt;</i></tt></b><tr><td><td>Set catalog server to <i>&lt;catalog&gt;</i>. Format: HOSTNAME:PORT
+<tr><td> <b><tt>-e</tt></b> <td>Set the WorkQueue master to only accept workers that have the same -N <i>&lt;project&gt;</i> option.
+<tr><td colspan=2> <b><tt>-F <i>&lt;#&gt;</i></tt></b><tr><td><td>WorkQueue fast abort multiplier. (default is deactivated)
+<tr><td colspan=2> <b><tt>-N <i>&lt;project&gt;</i></tt></b><tr><td><td>Set the project name to <i>&lt;project&gt;</i>.
+<tr><td colspan=2> <b><tt>-p <i>&lt;port&gt;</i></tt></b><tr><td><td>Port number to use with WorkQueue . (default is 9123, -1=random)
+<tr><td colspan=2> <b><tt>-P <i>&lt;integer&gt;</i></tt></b><tr><td><td>Priority. Higher the value, higher the priority.
+<tr><td colspan=2> <b><tt>-w <i>&lt;mode&gt;</i></tt></b><tr><td><td>Auto WorkQueue mode. Mode is either 'width' or 'group' (DAG [width] or largest [group] of tasks).
+<tr><td colspan=2> <b><tt>-W <i>&lt;mode&gt;</i></tt></b><tr><td><td>WorkQueue scheduling algorithm. (time|files|fcfs)
+</table>
+
+<h3>Other Options</h3>
+<table>
+<tr><td> <b><tt>-A</tt></b> <td>Disable the check for AFS. (experts only)
+<tr><td> <b><tt>-K</tt></b> <td>Preserve (i.e., do not clean) intermediate symbolic links.
+<tr><td> <b><tt>-z</tt></b> <td>Force failure on zero-length output files.
+</table>
+
+<h2>ENVIRONMENT VARIABLES</h2>
+
+The following environment variables will affect the execution of your
+<b>Makeflow</b>:
+<h3>BATCH_OPTIONS</h3>
+
+This corresponds to the <b>-B</b> <i>&lt;options&gt;</i> parameter and will pass extra
+batch options to the underlying execution engine.
+
+<h3>MAKEFLOW_MAX_LOCAL_JOBS</h3>
+This corresponds to the <b>-j</b> <i>&lt;#&gt;</i> parameter and will set the maximum
+number of local batch jobs.  If a <b>-j</b> <i>&lt;#&gt;</i> parameter is specified, the
+minimum of the argument and the environment variable is used.
+
+<h3>MAKEFLOW_MAX_REMOTE_JOBS</h3>
+This corresponds to the <b>-J</b> <i>&lt;#&gt;</i> parameter and will set the maximum
+number of local batch jobs.  If a <b>-J</b> <i>&lt;#&gt;</i> parameter is specified, the
+minimum of the argument and the environment variable is used.
+<p>
+Note that variables defined in your <b>Makeflow</b> are exported to the
+environment.
+
+<h2>EXIT STATUS</h2>
+On success, returns zero.  On failure, returns non-zero.
+
+<h2>EXAMPLES</h2>
+
+Run makeflow locally with debugging:
+<pre>
+makeflow -d all Makeflow
+</pre>
+   
+Run makeflow on Condor will special requirements:
+<pre>
+makeflow -T condor -B "requirements = MachineGroup == 'ccl'" Makeflow
+</pre>
+
+Run makeflow with WorkQueue using named workers:
+<pre>
+makeflow -T wq -a -N project.name Makeflow
+</pre>
+
+<h2>COPYRIGHT</h2>
+
+The Cooperative Computing Tools are Copyright (C) 2003-2004 Douglas Thain and Copyright (C) 2005-2011 The University of Notre Dame.  This software is distributed under the GNU General Public License.  See the file COPYING for details.
+
+<h2>SEE ALSO</h2>
+
+<dir>
+<li> <a href="../index.html">Cooperative Computing Tools Documentation</a>
+<li> <a href="../makeflow.html">Makeflow User Manual</a>
+<li> <a href=makeflow.html>makeflow(1)</a>
+<li> <a href=makeflow_monitor.html>makeflow_monitor(1)</a>
+<li> <a href=starch.html>starch(1)</a>
+</dir>
+
+<p><hr>CCTools 3.4.2 released on 02/10/2012</body></html>
+

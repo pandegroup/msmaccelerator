@@ -1,0 +1,140 @@
+#!/usr/bin/env python
+import os, sys
+from msmbuilder import arglib
+from monakos import Sampling
+from monakos import BatchMaster
+from monakos import Builder
+from monakos import Brain
+from monakos import Project
+import logging
+from monakos.utils import GMailHandler #, setup_logger
+import IPython as ip
+
+
+def setup_logger(file_level, email_level, filename, email_addrs, email_subject='MSMAccelerator Log'):
+    logger = logging.getLogger('MSMAccelerator')
+    logger.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('%(name)s: %(asctime)s: %(levelname)s: %(message)s', '%m/%d/%y [%H:%M:%S]')
+
+    if len(email_addrs) > 0:
+        gmail_handler = GMailHandler(email_addrs, email_subject)
+        gmail_handler.setLevel(email_level)
+        gmail_handler.setFormatter(formatter)
+        logger.addHandler(gmail_handler)
+
+    file_handler = logging.FileHandler(filename)
+    file_handler.setLevel(file_level)
+    file_handler.setFormatter(formatter)
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(file_level)
+    console_handler.setFormatter(formatter)
+
+    logger.addHandler(file_handler)
+
+    return logger
+
+
+def format_qsub_args(args):
+
+    if args.scheduler == 'PBS':
+        qsub_arguments = '-q %s -lwalltime=%s -lnodes=%d:ppn=%d' % (args.queue, args.walltime,
+                                                                    args.num_nodes, args.ppn)
+        one_node_qsub_arguments = '-q %s -lwalltime=%s -lnodes=1:ppn=%d' % (args.queue, args.walltime,
+                                                                            args.ppn)
+
+    else:
+        raise Exception('Scheduler: %s not valid/implemented.' % args.scheduler)
+
+    return qsub_arguments, one_node_qsub_arguments
+    
+
+def main():
+
+    # Parse arguments
+    parser = arglib.ArgumentParser(description='MSMAccelerator: Adaptive Sampling Markov State Model Molecular Dynamics')
+
+    parser.add_argument('project_filename', description='MSMAccelerator Project File (.yaml)')
+
+    parser.add_argument('walltime', description='Cluster scheduler system in use')
+    parser.add_argument('num_nodes', description='Total number of cluster nodes to request', type=int)
+    parser.add_argument('ppn', description='Processers per node to use', type=int)
+
+    parser.add_argument('file_log', description='Filename to log to')
+
+    parser.add_argument('scheduler', description='Cluster scheduler system in use', default='PBS')
+    parser.add_argument('queue', description='The scheduler queue to submit to', default='default')
+    parser.add_argument('remote_building', description='''If this flag is set, then submit building jobs
+                                                          to the cluster queue, and finish them on a work
+                                                          node. Default: run the builder on the head node.''',
+                        type=bool, default=False, action='store_true')
+
+    parser.add_argument('email_log', description='Email address(es) to send log events to', 
+                        nargs='+', type=list, default=[])
+    parser.add_argument('file_level', description='Log level for file',
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='INFO')
+    parser.add_argument('email_level', description='Email address to send log events to',
+                        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='ERROR')
+
+    args = parser.parse_args()
+    
+    logger = setup_logger(args.file_level, args.email_level, args.file_log,
+                          args.email_log, email_subject='MSMAccelerator {0}'.format(args.email_level))
+
+    sleep_time = 5 # hard-wired for now
+    
+    try:
+        logger.info('Starting up')
+        project = Project(args.project_filename)
+        builder = Builder(project)
+        brain   = Brain(project)
+        
+        qsub_arguments, one_node_qsub_arguments = format_qsub_args(args) # make a string to use with qsub
+
+        num_cpus = args.num_nodes * args.ppn
+
+        logger.info('Currently on round %d. Going to round %d' \
+            % (builder.round_num, project.num_rounds))
+
+        while builder.round_num < project.num_rounds:
+
+             # submit a 'production' job, which runs a bunch of MD simulations
+             logger.info('Starting production job...')
+
+             # build from round_num - 1, since that is the last completed round
+             jobs = BatchMaster.write_production_job_script(builder.round_num-1, num_cpus, brain, 
+                                                            job_script_name='msma-batch-production.sh',
+                                                            working_dir_base='/scratch',
+                                                            scheduler=args.scheduler)
+             BatchMaster.submit_job_to_queue('msma-batch-production.sh', 
+                                             qsub_arguments, scheduler=args.scheduler)
+             BatchMaster.wait_for_job_completion(sleep_time=sleep_time, scheduler=args.scheduler)
+             BatchMaster.process_completed_trajectories(project, jobs, working_dir_base='/scratch')
+
+             # submit a 'builder' job, which builds an MSM and updates the adaptive sampling weights
+             logger.info('Finished production job, starting builder job...')
+
+             if args.remote_building:
+                 # this is prolly broken
+                 BatchMaster.write_builder_job_script(job_script_name='msma-batch-builder.sh',
+                                                      scheduler=args.scheduler)
+                 BatchMaster.submit_job_to_queue('msma-batch-builder.sh', one_node_qsub_arguments,
+                                                  scheduler=args.scheduler)
+                 BatchMaster.wait_for_job_completion(sleep_time=sleep_time, scheduler=args.scheduler)
+   
+             else:
+                 builder.run_round(checkdata=False)
+ 
+             logger.info('Finished round {0}'.format(builder.round_num-1))
+
+            
+    except Exception as e:
+        logger.exception(e)
+        raise
+    finally:
+        logger.critical('MSMAccelerator exiting')
+        
+
+if __name__ == '__main__':
+    main()

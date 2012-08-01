@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/wavefront/src
+END
+wavefront_master
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/wavefront/src/wavefront_master
+END
+wavefront_master.c
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/wavefront/src/wavefront_master.c
+END
+wavefront
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/wavefront/src/wavefront
+END
+wavefront.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/wavefront/src/wavefront.c
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/wavefront/src/Makefile
+END

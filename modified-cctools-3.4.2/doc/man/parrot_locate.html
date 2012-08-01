@@ -1,0 +1,88 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html><head><title>parrot_locate(1)</title></head><body><h1>parrot_locate(1)</h1>
+
+<h2>NAME</h2>
+<b>parrot_locate</b> - provides the true location of the data stored in a named file.
+
+<h2>SYNOPSIS</h2>
+<tt><b>parrot_locate path</b></tt>
+
+<h2>DESCRIPTION</h2>
+
+<tt>parrot_locate</tt> utilises <b>parrot</b> system calls to identify where the data stored as the file
+at <tt><i>&lt;path&gt;</i></tt> is actually located.  For example, running <tt>parrot_locate</tt> on a file stored in a
+<b>chirp</b> multi-volume will return the server name and file path on the server where the data is.
+Running it on a file stored in <b>hdfs</b> will return the list of chunk servers storing the file.
+<p>
+Note that <tt>parrot_locate</tt> varies depending on the underlying system.  Most systems return output
+in the form "<tt><i>&lt;server&gt;</i>:<i>&lt;real path&gt;</i></tt>", but that output is not guaranteed.
+
+
+<h2>OPTIONS</h2>
+
+<tt>parrot_locate</tt> has no options.
+
+
+<h2>ENVIRONMENT VARIABLES</h2>
+Environment variables required by <tt>parrot_locate</tt> are system dependent.
+Most systems do not use or require any.  Refer to the specific system's documentation
+for more information.
+
+
+<h2>EXIT STATUS</h2>
+On success, returns zero.  On failure, returns non-zero.
+
+<h2>EXAMPLES</h2>
+
+To check the location of a file stored in chirp:
+
+<pre>
+% parrot_run parrot_locate /chirp/server.nd.edu/joe/data
+	server.nd.edu:/chirp/server.nd.edu/joe/data
+</pre>
+
+or a file stored in a chirp multi-volume
+
+<pre>
+% parrot_run parrot_locate /multi/server.nd.edu@multivol/data
+	datastore01.nd.edu:multivol/data/ttmtteotsznxewoj
+</pre>
+
+<h2>COPYRIGHT</h2>
+
+The Cooperative Computing Tools are Copyright (C) 2003-2004 Douglas Thain and Copyright (C) 2005-2011 The University of Notre Dame.  This software is distributed under the GNU General Public License.  See the file COPYING for details.
+
+<h2>SEE ALSO</h2>
+
+<dir>
+<li> <a href="../index.html">Cooperative Computing Tools Documentation</a>
+<li> <a href="../parrot.html">Parrot User Manual</a>
+<li> <a href=parrot_run.html>parrot_run(1)</a>
+<li> <a href=parrot_run_hdfs.html>parrot_run_hdfs(1)</a>
+<li> <a href=parrot_cp.html>parrot_cp(1)</a>
+<li> <a href=parrot_getacl.html>parrot_getacl(1)</a>
+<li> <a href=parrot_setacl.html>parrot_setacl(1)</a>
+<li> <a href=parrot_mkalloc.html>parrot_mkalloc(1)</a>
+<li> <a href=parrot_lsalloc.html>parrot_lsalloc(1)</a>
+<li> <a href=parrot_locate.html>parrot_locate(1)</a>
+<li> <a href=parrot_timeout.html>parrot_timeout(1)</a>
+<li> <a href=parrot_whoami.html>parrot_whoami(1)</a>
+<li> <a href=parrot_md5.html>parrot_md5(1)</a>
+</dir>
+
+<p><hr>CCTools 3.4.2 released on 02/10/2012</body></html>
+

@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/makeflow/src
+END
+makeflow_log_parser
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/makeflow/src/makeflow_log_parser
+END
+starch
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/makeflow/src/starch
+END
+makeflow
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/makeflow/src/makeflow
+END
+makeflow.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/makeflow/src/makeflow.c
+END
+sge_submit_makeflow
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/makeflow/src/sge_submit_makeflow
+END
+condor_submit_makeflow
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/makeflow/src/condor_submit_makeflow
+END
+makeflow_monitor
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/makeflow/src/makeflow_monitor
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/makeflow/src/Makefile
+END

@@ -1,0 +1,377 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/chirp/src
+END
+chirp_audit.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_audit.h
+END
+chirp_client.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_client.c
+END
+chirp_get.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_get.c
+END
+chirp_fuse
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/chirp/src/chirp_fuse
+END
+chirp_client.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_client.h
+END
+chirp_status.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_status.c
+END
+chirp_ticket.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_ticket.c
+END
+chirp_server
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/chirp/src/chirp_server
+END
+chirp_put
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/chirp/src/chirp_put
+END
+chirp_matrix_verify.c
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_matrix_verify.c
+END
+chirp_ticket.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_ticket.h
+END
+chirp_server_hdfs
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_server_hdfs
+END
+chirp_alloc.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_alloc.c
+END
+chirp_stream.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_stream.c
+END
+chirp_stream_files
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/chirp/src/chirp_stream_files
+END
+chirp_distribute
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/chirp/src/chirp_distribute
+END
+chirp_stats.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_stats.c
+END
+chirp
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/chirp/src/chirp
+END
+chirp_alloc.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_alloc.h
+END
+chirp_global.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_global.c
+END
+chirp_stream.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_stream.h
+END
+chirp_fuse.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_fuse.c
+END
+chirp_stats.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_stats.h
+END
+chirp_matrix.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_matrix.c
+END
+chirp_global.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_global.h
+END
+chirp_protocol.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_protocol.h
+END
+chirp_server.c
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_server.c
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/Makefile
+END
+chirp_recursive.c
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_recursive.c
+END
+chirp_put.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_put.c
+END
+chirp_matrix.h
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_matrix.h
+END
+chirp_benchmark
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/chirp/src/chirp_benchmark
+END
+chirp_types.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_types.h
+END
+chirp_fs_hdfs.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_fs_hdfs.c
+END
+chirp_recursive.h
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_recursive.h
+END
+chirp_stream_files.c
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_stream_files.c
+END
+chirp_tool.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_tool.c
+END
+chirp_distribute.c
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_distribute.c
+END
+chirp_matrix_benchmark.c
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_matrix_benchmark.c
+END
+chirp_fs_hdfs.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_fs_hdfs.h
+END
+chirp_fs_local.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_fs_local.c
+END
+chirp_filesystem.c
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_filesystem.c
+END
+chirp_audit_cluster
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_audit_cluster
+END
+chirp_fs_local.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_fs_local.h
+END
+chirp_filesystem.h
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_filesystem.h
+END
+chirp_benchmark.c
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_benchmark.c
+END
+chirp_multi.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_multi.c
+END
+chirp_reli.c
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_reli.c
+END
+chirp_group.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_group.c
+END
+chirp_fs_chirp.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_fs_chirp.c
+END
+chirp_get
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/chirp/src/chirp_get
+END
+chirp_acl.c
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_acl.c
+END
+chirp_multi.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_multi.h
+END
+chirp_reli.h
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_reli.h
+END
+chirp_group.h
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_group.h
+END
+chirp_fs_chirp.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_fs_chirp.h
+END
+chirp_status
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/111/modified-cctools-3.4.2/chirp/src/chirp_status
+END
+chirp_thirdput.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_thirdput.c
+END
+chirp_acl.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_acl.h
+END
+chirp_audit.c
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_audit.c
+END
+chirp_matrix_roc.c
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_matrix_roc.c
+END
+chirp_thirdput.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/src/chirp_thirdput.h
+END

@@ -1,0 +1,40 @@
+forcefields:
+  -
+    name: amber99sb
+    water: tip3p
+    driver: ~/path/to/driver
+    threads: 8
+  -
+    name: ameoba
+    water: ameoba
+    driver: ~/path/to/driver
+    threads: 8
+    gold_standard: True
+    
+pdb_topology_file: dipeptide.pdb
+directory_of_seed_PDBS_for_first_round: starting_confs
+
+# MSM Builder Parameters
+metric:
+  type: !metric RMSD
+  init_kwargs:
+    atomindices: !array /Users/rmcgibbo/Desktop/msmb_tutorial/AtomIndices.dat, int   
+metric:
+  type: !metric Dihedral
+  init_kwargs:
+    metric: minkowski
+    p: 3
+    angles: phi
+clustering:
+  type: !clustering KCenters
+  init_kwargs:
+    #k: 5000
+    distance_cutoff: 0.03
+  stride: 1
+symmetrize: transpose
+lagtime: 10
+  
+
+
+
+

@@ -1,0 +1,148 @@
+#!/bin/sh
+
+show_help() 
+{
+	echo "Use: pbs_submit_workers [options] <servername> <port> <num-nodes> <ppn> <pbs-queue> <walltime> <workers-per-node>"
+	echo "where options are:"
+	echo "  -a               Enable auto mode."
+        echo "  -f               Set up SSH forwarding through the head node (if work nodes cannot connect to the internet)"
+        echo "  -g               Enable GPU run (sets the CUDA device ID)"
+	echo "  -s               Run as a shared worker."
+	echo "  -N <name>        Preferred master name."
+	echo "  -C <catalog>     Set catalog server to <catalog>. <catalog> format: HOSTNAME:PORT."
+	echo "  -t <time>        Abort after this amount of idle time. (default=900s)"
+	echo "  -p <parameters>  SGE qsub parameters."
+	echo "  -h               Show this help message."
+	exit 1
+}
+
+arguments=""
+use_auto=0
+port_forward=0
+gpujob=0
+parameters=""
+
+while getopts afgsN:t:p:h opt 
+do
+	case "$opt" in
+		a)  arguments="$arguments -a"; use_auto=1;;
+                f)  port_forward=1;;
+                g)  gpujob=1;;
+		s)  arguments="$arguments -s";;
+		N)  arguments="$arguments -N $OPTARG";;
+		C)  arguments="$arguments -C $OPTARG";;
+		t)  arguments="$arguments -t $OPTARG";;
+		p)  parameters="$parameters $OPTARG";;
+		h)  show_help;;
+		\?) show_help;;
+	esac
+done
+
+shift $(expr $OPTIND - 1)
+
+if [ $use_auto = 0 ]; then
+    if [ X$7 = X ]
+    then
+	show_help	
+    fi
+    host=$1
+    port=$2
+    count=$3
+    PPN=$4
+    pbsqueue=$5
+    walltime=$6
+    workerspernode=$7
+else
+    if [ X$1 = X ]
+    then
+	show_help	
+    fi
+    host=
+    port=
+    count=$1
+fi
+
+worker=`which work_queue_worker 2>/dev/null`
+if [ $? != 0 ]
+then
+	echo "$0: please add 'work_queue_worker' to your PATH."
+	exit 1
+fi
+
+qsub=`which qsub 2>/dev/null`
+if [ $? != 0 ]
+then
+	echo "$0: please add 'qsub' to your PATH."
+	exit 1
+fi
+
+mkdir -p ${USER}-workers
+cd ${USER}-workers
+# cp $worker . #TJL - I don't think we even need this...
+
+username=`whoami`
+
+cat >worker.sh <<EOF
+#!/bin/bash
+
+#PBS -N MSMa-worker
+#PBS -e worker.log
+#PBS -o worker.log
+#PBS -l nodes=1:ppn=$PPN
+#PBS -l walltime=$walltime
+#PBS -V
+
+# Set up where the workers will temporarily write. We try, in order:
+# (1) /scratch, (2) /tmp, (3) user's home
+# sometimes permissions prevent us from writing, if so we try the next option
+
+if [ -w /scratch ]
+then
+    worker_scratch_dir=/scratch/$username 
+
+elif [ -w /tmp ]
+then
+    worker_scratch_dir=/tmp/$username
+
+else
+    worker_scratch_dir=/home/$username/worker-scratch
+fi
+
+mkdir -p \$worker_scratch_dir
+export _CONDOR_SCRATCH_DIR=\$worker_scratch_dir
+cd \$worker_scratch_dir
+
+echo "Set scratch to: \$_CONDOR_SCRATCH_DIR"
+
+export OMP_NUM_THREADS=$PPN
+
+# if enabled, we now we port-forward, routing traffic via the head node
+if [ $port_forward == 1 ]; then
+    echo "Forwarding enabled: routing traffic via the headnode..."
+    ps aux | grep $username | grep ServerAlive | grep -v grep | awk '{print \$2}' | xargs kill 2> /dev/null
+    ssh -o ServerAliveInterval=180 -N -f -L$port:$host:$port $headnode
+    echo | ssh-keygen -q -y >> ~/.ssh/authorized_keys
+fi
+
+# submit the number of appropriate workers on this node
+for i in \`seq $workerspernode \`; do
+    
+    # if this is a GPU run, then pass off the appropriate CUDA device ID
+    if [ $gpujob == 1 ]; then
+        export CUDA_DEVICE=\$i
+    fi
+
+    work_queue_worker -d all $arguments $host $port >> workers.log &
+done
+wait
+EOF
+
+chmod 755 worker.sh
+
+for n in `seq 1 $count`
+do
+  qsub -q $pbsqueue -d $PWD $parameters worker.sh
+  return_status=$?
+done
+
+exit $return_status

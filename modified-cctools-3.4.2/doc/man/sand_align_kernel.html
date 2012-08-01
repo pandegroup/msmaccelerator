@@ -1,0 +1,85 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html><head><title>sand_align_kernel(1)</title></head><body><h1>sand_align_kernel(1)</h1>
+
+<h2>NAME</h2>
+<b>sand_align_kernel</b> - align candidate sequences sequentially
+
+<h2>SYNOPSIS</h2>
+<tt><b>sand_align_kernel [options] [input file]</b></tt>
+
+<h2>DESCRIPTION</h2>
+
+<b>sand_align_kernel</b> aligns candidate sequences sequentially.
+It is not normally called by the user, but is invoked by
+<a href=sand_align_master.html>sand_align_master(1)</a> for each sequential step of a distributed
+alignment workload.  The options to <b>sand_align_kernel</b> control
+the type of alignment (Smith-Waterman, Prefix-Suffix, Banded, etc)
+and the quality threshhold for reporting alignments.  These options
+are typically passed in by giving the <b>-e</b> option to <b>sand_align_master</b>.
+<p>
+<b>sand_align_kernel</b> reads a list of sequences
+from the given input file, or from standard input if none is given.
+The sequences are in the compressed fasta format produced
+by <a href=sand_compress_reads.html>sand_compress_reads(1)</a>.  The first sequence in the input
+is compared against all following sequences until a separator line.
+Following the separator, the next sequence is compared against
+all following sequences until the following separator, and so on.
+
+<h2>OPTIONS</h2>
+
+<table>
+<tr><td colspan=2> <b><tt>-a <i>&lt;sw|ps|banded&gt;</i></tt></b><tr><td><td>Specify the type of alignment: sw (Smith-Waterman), ps (Prefix-Suffix), or banded.  If not specified, default is banded.
+<tr><td colspan=2> <b><tt>-o <i>&lt;ovl|ovl_new|align|matrix&gt;</i></tt></b><tr><td><td>Specify how each alignment should be output: ovl (Celera V5, V6 OVL format), ovl_new (Celera V7 overlap format), align (display the sequences and alignment graphically) or matrix (display the dynamic programming matrix).  <a href=sand_align_master.html>sand_align_master(1)</a> expects the ovl output format, which is the default.  The other formats are useful for debugging.
+<tr><td colspan=2> <b><tt>-m <i>&lt;length&gt;</i></tt></b><tr><td><td>Minimum aligment length (default: 0).
+<tr><td colspan=2> <b><tt>-q <i>&lt;quality&gt;</i></tt></b><tr><td><td>Minimum match quality (default: 1.00)
+<tr><td> <b><tt>-x</tt></b> <td>Delete input file after completion.
+<tr><td colspan=2> <b><tt>-d <i>&lt;subsystem&gt;</i></tt></b><tr><td><td>Enable debugging for this subsystem.  (Try <b>-d all</b> to start.
+<tr><td> <b><tt>-v</tt></b> <td>Show program version.
+<tr><td> <b><tt>-h</tt></b> <td>Display this message.
+</table>
+
+<h2>EXIT STATUS</h2>
+On success, returns zero.  On failure, returns non-zero.
+
+<h2>EXAMPLES</h2>
+
+Users do not normally invoke sand_align_kernel directly.  Instead, pass arguments by using the <b>-e</b> option to <a href=sand_align_master.html>sand_align_master(1)</a>.  For example, to specify a minimum alignment length of 5 and a minimum quality of 0.25:
+
+<pre>
+% sand_align_master sand_align_kernel -e "-m 5 -q 0.25" mydata.cand mydata.cfa mydata.ovl
+</pre>
+
+<h2>COPYRIGHT</h2>
+
+The Cooperative Computing Tools are Copyright (C) 2003-2004 Douglas Thain and Copyright (C) 2005-2011 The University of Notre Dame.  This software is distributed under the GNU General Public License.  See the file COPYING for details.
+
+<h2>SEE ALSO</h2>
+
+<dir>
+<li> <a href="../index.html">Cooperative Computing Tools Documentation</a>
+<li> <a href="../sand.html">SAND User Manual</a>
+<li> <a href=sand_filter_master.html>sand_filter_master(1)</a>
+<li> <a href=sand_filter_kernel.html>sand_filter_kernel(1)</a>
+<li> <a href=sand_align_master.html>sand_align_master(1)</a>
+<li> <a href=sand_align_kernel.html>sand_align_kernel(1)</a>
+<li> <a href=sand_compress_reads.html>sand_compress_reads(1)</a>
+<li> <a href=sand_uncompress_reads.html>sand_uncompress_reads(1)</a>
+<li> <a href=work_queue_worker.html>work_queue_worker(1)</a>
+</dir>
+
+<p><hr>CCTools 3.4.2 released on 02/10/2012</body></html>
+

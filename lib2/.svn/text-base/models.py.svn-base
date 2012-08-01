@@ -1,0 +1,179 @@
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+engine = create_engine('sqlite:///db.sqlite', echo=False)
+Session = sessionmaker(bind=engine)
+db = Session()
+
+# DECLARE MODELS
+import msmbuilder.Trajectory
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import (Column, Integer, String, DateTime,
+                        Float, ForeignKey, Table, PickleType)
+Base = declarative_base()
+STRING_LEN = 500
+
+
+
+class Forcefield(Base):
+    """
+    database model describing a forcefield and how to run simulations using
+    it (driver, threads, etc)
+    """
+    __tablename__ = 'forcefields'
+    
+    id = Column(Integer, primary_key=True)
+    name = Column(String(STRING_LEN))
+    water = Column(String(STRING_LEN))
+    driver = Column(String(STRING_LEN))
+    threads = Column(Integer)
+    output_extension = Column(String(STRING_LEN))
+        
+    def __repr__(self):
+        return "<Forcefield(name={}, water={}, driver={})>".format(self.name,
+            self.water, self.driver)
+
+
+class Trajectory(Base):
+    """
+    database model describing a trajectory
+    """
+    
+    __tablename__ = 'trajectories'
+    
+    id = Column(Integer, primary_key=True)
+    init_pdb = Column(String(STRING_LEN))
+    wqlog_fn = Column(String(STRING_LEN))
+    dry_xtc_fn = Column(String(STRING_LEN))
+    wet_xtc_fn = Column(String(STRING_LEN))
+    lh5_fn = Column(String(STRING_LEN))
+    fileroot = Column(Integer)
+    host = Column(String(STRING_LEN))
+    last_wet_snapshot = Column(String(STRING_LEN))
+    mode = Column(String(STRING_LEN))
+    name = Column(String(STRING_LEN))
+    returned_time = Column(Float)
+    submit_time = Column(Float)
+    traj_length = Column(Integer) # in frames
+    
+    # many to one relationship
+    forcefield_id = Column(Integer, ForeignKey('forcefields.id'))
+    forcefield = relationship("Forcefield", backref=backref('trajectories', order_by=id))
+    
+    def __repr__(self):
+        return "<Trajectory(name={})>".format(self.name)
+    
+    def __len__(self):
+        return self.traj_length
+    
+    def load_from_lh5(self, stride=1):
+        "Load the msmbuilder.Trajectory object from the lh5 file"
+        return msmbuilder.Trajectory.LoadTrajectoryFile(self.lh5_fn)[::stride]
+    
+    def extract_wet_frame(self, frame_index, tmp_dir='/tmp'):
+        """Extract a PDB of a solvated structure (single frame) in this trajectory
+        
+        Parameters
+        ----------
+        frame_index : int
+            Index of the frame to extract
+        tmp_dir : str, optional
+            Directory to put the PDB file into
+        
+        Returns
+        -------
+        path : str
+            path to the PDB file
+        """
+        
+        if self.wet_xtc_fn is not None:
+            conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.last_wet_snapshot)
+            xyz = msmbuilder.Trajectory.ReadFrame(self.wet_xtc_fn, frame_index)
+        else:
+            conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
+            xyz = msmbuilder.Trajectory.ReadFrame(xtc_path, frame_index)
+
+        if not (xyz.shape == conf['XYZList'][0,:,:].shape):
+            raise Exception("Number of atoms is wrong: xyz.shape={0}, conf['XYZList'][0,:,:].shape={1}".format(xyz.shape, conf['XYZList'][0,:,:].shape))
+
+        conf['XYZList'] = np.array([xyz])
+        output = '%s/%d.pdb' % (tmp_dir, np.random.randint(sys.maxint))
+        conf.SaveToPDB(output)
+        
+        return output
+        
+        
+
+class MarkovModel(Base):
+    """
+    database model describing an MSM built from a set of trajectories, all in the
+    same forcefield
+    
+    Each BuildRound contains multiple MarkovModels
+    """
+    __tablename__ = 'markov_models'
+    
+    id = Column(Integer, primary_key=True)
+    counts_fn = Column(String(STRING_LEN))
+    assignments_fn = Column(String(STRING_LEN))
+    inverse_assignments = Column(PickleType)
+    
+    
+    forcefield_id = Column(Integer, ForeignKey('forcefields.id'))
+    forcefield = relationship("Forcefield", backref=backref('markov_models',
+        order_by=id))
+    
+    # a many to many relationship between models and trajectories -- each model
+    # can be have multiple trajectories and each trajectory can be in multiple
+    # models
+    trajectories = relationship("Trajectory",  backref='markov_models',
+        secondary=Table('markov_model_trajectories', Base.metadata,
+                Column('markov_model_id', Integer, ForeignKey('markov_models.id')),
+                Column('trajectory_id', Integer, ForeignKey('trajectories.id'))))
+    
+
+    msm_group_id = Column(Integer, ForeignKey('msm_groups.id'))
+    msm_group = relationship('MSMGroup', backref=backref('markov_models',
+        order_by=id))
+    
+    # When selecting which forcefield to shoot from after a round, choose based
+    # on a multinomial with this weight
+    model_selection_weight = Column(Float)
+    
+    
+    def __init__(self, counts, assignments, distances, forcefield, trajectories):
+        raise NotImplementedError('Sorry')
+        # self.counts_fn = self._get_counts_fn()
+        # self.assignments_fn = self._get_assignments_fn()
+        # scipy.io.mmwrite(counts, self.counts_fn)
+        
+        # serializer.savedata(assignments, distances)
+        self.forcefield = forcefield
+        self.trajectories = trajectories
+        
+        # calculate inverse assignments
+        # save them to disk
+    
+    def __repr__(self):
+        return "<MarkovModel(id={}, msm_group={}, forcefield={})>".format(self.id,
+            self.msm_group_id, self.forcefield.name)
+
+class MSMGroup(Base):
+    """
+    database model describing a set of MarkovModels built during concurrently
+    that share a joint clustering
+    """
+    __tablename__ = 'msm_groups'
+    
+    id = Column(Integer, primary_key=True)
+    
+    generators_fn = Column(String(STRING_LEN))
+    microstate_selection_weights = Column(PickleType)
+
+    def __repr__(self):
+        return "<BuildRound(id={})>".format(self.id)
+        
+    
+    
+
+Base.metadata.create_all(engine)

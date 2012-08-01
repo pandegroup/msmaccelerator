@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/apps/replica_exchange_protomol
+END
+replica_exchange_protomol_nobarrier
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/apps/replica_exchange_protomol/replica_exchange_protomol_nobarrier
+END
+replica_exchange_protomol_barrier
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/apps/replica_exchange_protomol/replica_exchange_protomol_barrier
+END
+ww_exteq_nowater1.pdb
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/apps/replica_exchange_protomol/ww_exteq_nowater1.pdb
+END
+ww_exteq_nowater1.psf
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/apps/replica_exchange_protomol/ww_exteq_nowater1.psf
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/apps/replica_exchange_protomol/Makefile
+END
+par_all27_prot_lipid.inp
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/apps/replica_exchange_protomol/par_all27_prot_lipid.inp
+END

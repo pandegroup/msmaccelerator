@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/svn/monakos/!svn/ver/112/drivers/GROMACS
+END
+ala5.pdb
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/monakos/!svn/ver/17/drivers/GROMACS/ala5.pdb
+END
+test_command.sh
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svn/monakos/!svn/ver/17/drivers/GROMACS/test_command.sh
+END
+clean.sh
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/monakos/!svn/ver/61/drivers/GROMACS/clean.sh
+END
+gromacs_driver.py
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/monakos/!svn/ver/112/drivers/GROMACS/gromacs_driver.py
+END

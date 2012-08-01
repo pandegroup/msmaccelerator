@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+import sys
+import re
+
+from glob import glob
+
+from argparse import ArgumentParser
+
+from Emsmbuilder import MSMLib
+from Emsmbuilder import Serializer
+
+from monakos import Project
+
+from numpy import zeros, ones, arange
+import matplotlib.pyplot as pp
+
+
+# parse args
+print '\n%s: Plot number of states vs. amount of data\n' % sys.argv[0]
+parser = ArgumentParser()
+parser.add_argument('params_fn', help='Monakos Parameters File (yaml)')
+parser.add_argument('num_timescales', help='Number of Implied Timescales to Plot')
+args = parser.parse_args()
+
+project = Project(args.params_fn)
+num_timescales = int(args.num_timescales)
+
+# initialize arrays
+implied_timescales = zeros(( project.num_rounds, num_timescales ))
+clusters = zeros( project.num_rounds )
+
+# set up the figure
+fig, ax = pp.subplots(ncols=2)
+pp.subplots_adjust(bottom=0.3, top=0.7, wspace=0.3)
+
+# get the data from the Monakos run
+for ff in project.forcefields:
+
+    for rnd in range( project.num_rounds ):
+
+        round_dir = project.rootdir + '/' + ff['name'] + '/round%d/' % rnd
+        print "FF %s, round %d : %s" % (ff['name'], rnd, round_dir)
+
+        AssignmentsFn = round_dir + "Assignments.h5"
+        Assignments   = Serializer.LoadData(AssignmentsFn)
+        NumStates     = max(Assignments.flatten())+1
+
+        clusters[rnd] = NumStates
+        
+        # calculate the implied timescales at the lag time specified in the params file
+        NumEigen = min( NumStates-1, num_timescales )
+        wrapped_args = ( AssignmentsFn, NumStates, int(project.lagtime), 
+                         NumEigen, True, project.trim, 'Transpose' )
+        lagtimes, implied_timescales[rnd,:NumEigen] = MSMLib.GetImpliedTimescalesHelper( wrapped_args )
+
+        ax[1].scatter( ones(num_timescales)*rnd, implied_timescales[rnd,:] )
+
+ax[0].plot( arange(project.num_rounds), clusters, 'x-')
+ax[0].set_xlabel('Round Number')
+ax[0].set_ylabel('Number of MSM Microstates')
+
+ax[1].set_xlabel('Round Number')
+ax[1].set_ylabel('Implied Timescale')
+ax[1].set_yscale('log')
+
+pp.show()
+

@@ -1,0 +1,53 @@
+forcefields:
+  -
+    name: amber99sb-ildn
+    water: tip3p
+    driver: test_driver.py
+    threads: 8
+    cost: 1
+    gold_standard: True
+    output_extension: .xtc
+    # driver is expected to produce files called production_wet.xtc
+    # production_dry.xtc, and last_wet_snapshot.pdb
+    # Note that for method: explicit with output_extension: .dcd, you need to
+    # be using at least msmbuilder revision 900, which added some dcd
+    # functionality (loading individual frames)
+
+# if you supply a starting_confs_lh5, then the initial jobs will be generated
+# by randomly selecting conformations from that trajectory. Otherwise, all
+# the initial jobs will start from the topolgy file. All of the initial jobs
+# will be started with mode=Equilibrarion.
+pdb_topology_file: ala5.pdb  # this is used to generate the topolgy
+#starting_confs_lh5: # set of structures to start from
+
+# If method=explicit, then the driver is expected to return 3 files, production_dry.xtc (or .dcd)
+# production_wet.xtc (or .dcd) and last_wet_snapshot.pdb (the "xtc" files can actually also
+# be dcd files, if thats what you set as output_extension. The dry file needs to contain
+# the same atoms (and ordering) as the pdb_topology_file, whereas the wet file should
+# have the water so that subsequent jobs starting from that structure dont need to resolvated.
+
+# if method=implict (the other option), then only a production_dry will be returned.
+method: explicit
+
+# MSM Builder Parameters
+metric:
+  type: !metric RMSD
+  init_kwargs:
+    atomindices: !array AtomIndices.dat, int
+clusterer:
+  type: !clusterer KCenters
+  init_kwargs:
+    distance_cutoff: 0.1
+
+# MSM Building settings
+stride:                 1
+symmetrize:             None
+lagtime:                10
+trim:                   False
+cross_assign:           False
+adaptive_sampling:      even
+
+# Project settings
+project_dir: p1
+num_rounds: 100
+num_trajs_sufficient_for_round: 5

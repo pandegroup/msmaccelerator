@@ -1,0 +1,59 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html><head><title>split_fasta(1)</title></head><body><h1>split_fasta(1)</h1>
+
+<h2>NAME</h2> 
+<b>split_fasta</b> - Split a fasta file according to sequence and character counts
+
+<h2>SYNOPSIS</h2>
+<tt><b>split_fasta query_granularity character_granularity fasta_file</b></tt>
+
+<h2>DESCRIPTION</h2>
+<b>split_fasta</b> is a simple script to split a fasta file according to user provided parameters.  The script iterates over the given file, generating a new sub_file called input.i each time the contents of the previous file (input.(i-1)) exceed the number of queries given by query_granularity or the number of characters given by character_granularity. 
+
+<h2>OPTIONS</h2>
+<table>
+</table>
+
+<h2>EXIT STATUS</h2>
+On success, returns zero.  On failure, returns non-zero.
+
+<h2>ENVIRONMENT VARIABLES</h2>
+
+<h2>EXAMPLES</h2>
+
+To split a fasta file smallpks.fa into pieces no larger than 500 queries and with no piece receiving additional sequences if it exceeds 10000 characters we would do:
+<pre>
+python split_fasta 500 10000 smallpks.fa
+</pre>
+This would generate files input.0, input.1, ..., input.N where N is the number of appropriately constrained files necessary to contain all sequences in smallpks.fa.
+
+<h2>COPYRIGHT</h2>
+
+The Cooperative Computing Tools are Copyright (C) 2003-2004 Douglas Thain and Copyright (C) 2005-2011 The University of Notre Dame.  This software is distributed under the GNU General Public License.  See the file COPYING for details.
+
+<h2>SEE ALSO</h2>
+
+<dir>
+<li> <a href="../index.html">Cooperative Computing Tools Documentation</a>
+<li> <a href="../makeflow.html">Makeflow User Manual</a>
+<li> <a href=makeflow.html>makeflow(1)</a>
+<li> <a href=makeflow_monitor.html>makeflow_monitor(1)</a>
+<li> <a href=starch.html>starch(1)</a>
+</dir>
+
+<p><hr>CCTools 3.4.2 released on 02/10/2012</body></html>
+

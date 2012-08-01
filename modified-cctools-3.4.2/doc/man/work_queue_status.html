@@ -1,0 +1,67 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html><head><title>work_queue_status(1)</title></head><body><h1>work_queue_status(1)</h1>
+
+<h2>NAME</h2> 
+<b>work_queue_status</b> - display status of currently running Work Queue applications.
+
+<h2>SYNOPSIS</h2>
+<tt><b>work_queue_status [options]</b></tt>
+
+<h2>DESCRIPTION</h2>
+
+<b>work_queue_status</b> displays the status of currently running Work Queue applications registered with a catalog server.
+
+<dir>
+<li>Hostname and port number of the application.
+<li>Number of waiting tasks.
+<li>Number of completed tasks.
+<li>Number of connected workers.
+<li>Number of busy workers currently executing a task.
+<li>Timestamp of when there was last communication with the application.
+</dir>
+
+<h2>OPTIONS</h2>
+<table>
+<tr><td colspan=2> <b><tt>-d <i>&lt;subsystem&gt;</i></tt></b><tr><td><td>Enable debugging for the given subsystem. Try -d all as a start.
+<tr><td colspan=2> <b><tt>-t <i>&lt;time&gt;</i></tt></b><tr><td><td>RPC timeout (default=30s).
+<tr><td> <b><tt>-l</tt></b> <td>Long output.
+<tr><td> <b><tt>-h</tt></b> <td>Show this help message.
+</table>
+
+<h2>EXIT STATUS</h2>
+On success, returns zero.  On failure, returns non-zero.
+
+<h2>COPYRIGHT</h2>
+
+The Cooperative Computing Tools are Copyright (C) 2003-2004 Douglas Thain and Copyright (C) 2005-2011 The University of Notre Dame.  This software is distributed under the GNU General Public License.  See the file COPYING for details.
+
+<h2>SEE ALSO</h2>
+
+<dir>
+<li> <a href="../index.html">Cooperative Computing Tools Documentation</a>
+<li> <a href="../workqueue.html">Work Queue User Manual</a>
+<li> <a href=work_queue_worker.html>work_queue_worker(1)</a>
+<li> <a href=work_queue_status.html>work_queue_status(1)</a>
+<li> <a href=work_queue_pool.html>work_queue_pool(1)</a>
+<li> <a href=condor_submit_workers.html>condor_submit_workers(1)</a>
+<li> <a href=sge_submit_workers.html>sge_submit_workers(1)</a>
+<li> <a href=ec2_submit_workers.html>ec2_submit_workers(1)</a>
+<li> <a href=ec2_remove_workers.html>ec2_remove_workers(1)</a>
+</dir>
+
+<p><hr>CCTools 3.4.2 released on 02/10/2012</body></html>
+

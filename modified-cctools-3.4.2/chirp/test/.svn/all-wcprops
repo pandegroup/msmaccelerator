@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/test
+END
+TR_002_chirp_ops.sh
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/test/TR_002_chirp_ops.sh
+END
+Makefile
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/test/Makefile
+END
+TR_001_chirp_benchmark.sh
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/chirp/test/TR_001_chirp_benchmark.sh
+END

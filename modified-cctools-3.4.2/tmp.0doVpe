@@ -1,0 +1,1 @@
+-I/Library/Frameworks/EPD64.framework/Versions/7.3/include/python2.7 -I/Library/Frameworks/EPD64.framework/Versions/7.3/include/python2.7 -fno-strict-aliasing -fno-common -dynamic -arch x86_64 -DNDEBUG -g -O3 -arch x86_64

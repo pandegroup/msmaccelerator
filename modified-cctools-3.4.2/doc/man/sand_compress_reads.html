@@ -1,0 +1,75 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html><head><title>sand_compress_reads(1)</title></head><body><h1>sand_compress_reads(1)</h1>
+
+<h2>NAME</h2>
+<b>sand_compress_reads</b> - compress sequence data
+
+<h2>SYNOPSIS</h2>
+<tt><b>sand_compress_reads [-qcivh] [infile] [outfile]</b></tt>
+
+<h2>DESCRIPTION</h2>
+
+<b>sand_compress_reads</b> reads sequence data in standard FASTA format,
+and produces output in the compressed FASTA (cfa) format used by
+the <a href=sand_filter_master.html>sand_filter_master(1)</a> and <a href=sand_align_master.html>sand_align_master(1)</a>.
+<p>
+If the output file is omitted, standard output is used.
+if the input file is omitted, standard input is used.
+After completing the compression, this program will output a summary
+line of sequences and bytes compressed.
+
+<h2>OPTIONS</h2>
+
+<table>
+<tr><td> <b><tt>-q</tt></b> <td> Quiet mode: suppress summary line.
+<tr><td> <b><tt>-c</tt></b> <td> Remove Celera read ids if data came from the Celera gatekeeper.
+<tr><td> <b><tt>-i</tt></b> <td> Remove Celera read ids but leave internal ids if the data came from the Celera gatekeeper.
+<tr><td> <b><tt>-h</tt></b> <td> Display version information.
+<tr><td> <b><tt>-v</tt></b> <td> Show help text.
+</table>
+
+<h2>EXIT STATUS</h2>
+On success, returns zero.  On failure, returns non-zero.
+
+<h2>EXAMPLES</h2>
+
+To compress <tt>mydata.fasta</tt> into <tt>mydata.cfa</tt>:
+
+<pre>
+% sand_compress_reads mydata.fasta mydata.cfa
+</pre>
+
+<h2>COPYRIGHT</h2>
+
+The Cooperative Computing Tools are Copyright (C) 2003-2004 Douglas Thain and Copyright (C) 2005-2011 The University of Notre Dame.  This software is distributed under the GNU General Public License.  See the file COPYING for details.
+
+<h2>SEE ALSO</h2>
+
+<dir>
+<li> <a href="../index.html">Cooperative Computing Tools Documentation</a>
+<li> <a href="../sand.html">SAND User Manual</a>
+<li> <a href=sand_filter_master.html>sand_filter_master(1)</a>
+<li> <a href=sand_filter_kernel.html>sand_filter_kernel(1)</a>
+<li> <a href=sand_align_master.html>sand_align_master(1)</a>
+<li> <a href=sand_align_kernel.html>sand_align_kernel(1)</a>
+<li> <a href=sand_compress_reads.html>sand_compress_reads(1)</a>
+<li> <a href=sand_uncompress_reads.html>sand_uncompress_reads(1)</a>
+<li> <a href=work_queue_worker.html>work_queue_worker(1)</a>
+</dir>
+
+<p><hr>CCTools 3.4.2 released on 02/10/2012</body></html>
+

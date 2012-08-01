@@ -1,0 +1,121 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html><head><title>parrot_run(1)</title></head><body><h1>parrot_run(1)</h1>
+<h2>NAME</h2>
+<b>parrot_run</b> - run a program in the Parrot virtual file system
+
+<h2>SYNOPSIS</h2>
+<tt><b>parrot_run [parrot_options] program [program_options]</b></tt>
+
+<h2>DESCRIPTION</h2>
+<tt>parrot_run</tt> runs an application or a shell inside the Parrot virtual filesystem.  Parrot redirects the application's system calls to remote storage systems.  Parrot currently supports the following remote storage systems: HTTP, GROW, FTP, GridFTP, iRODS, HDFS, XRootd, Chirp.  This list may vary depending on how Parrot was built.  Run <tt>parrot -h</tt> to see exactly what support is available on your system.
+<p>
+Parrot works by trapping the application's system calls through the <tt>ptrace</tt> debugging interface.  It does not require any special privileges to install or run, so it is useful to ordinary users that wish to access data across wide area networks.  The <tt>ptrace</tt> debugging interface does have some cost, so applications may run slower, depending on how many I/O operations they perform.
+<p>
+For complete details with examples, see the <a href=http://www.nd.edu/~ccl/software/manuals/parrot.html>Parrot User's Manual</a>
+
+<h2>OPTIONS</h2>
+<table>
+<tr><td colspan=2> <b><tt>-a <i>&lt;unix|hostname|ticket|globus|kerberos&gt;</i></tt></b><tr><td><td>Use this Chirp authentication method.  May be invoked multiple times to indicate a preferred list, in order.
+<tr><td colspan=2> <b><tt>-A <i>&lt;file&gt;</i></tt></b><tr><td><td>Use this file as a default ACL.
+<tr><td colspan=2> <b><tt>-b <i>&lt;bytes&gt;</i></tt></b><tr><td><td>Set the I/O block size hint.
+<tr><td colspan=2> <b><tt>-c <i>&lt;file&gt;</i></tt></b><tr><td><td>Print exit status information to file.
+<tr><td> <b><tt>-C</tt></b> <td>Enable data channel authentication in GridFTP.
+<tr><td colspan=2> <b><tt>-d <i>&lt;name&gt;</i></tt></b><tr><td><td>Enable debugging for this sub-system.
+<tr><td> <b><tt>-D</tt></b> <td>Disable small file optimizations.
+<tr><td> <b><tt>-F</tt></b> <td>Enable file snapshot caching for all protocols.
+<tr><td> <b><tt>-f</tt></b> <td>Disable following symlinks.
+<tr><td colspan=2> <b><tt>-E <i>&lt;url&gt;</i></tt></b><tr><td><td>Endpoint for gLite combined catalog ifc.
+<tr><td colspan=2> <b><tt>-G <i>&lt;gid&gt;</i></tt></b><tr><td><td>Fake this gid; Real gid stays the same.
+<tr><td> <b><tt>-H</tt></b> <td>Disable use of helper library.
+<tr><td> <b><tt>-h</tt></b> <td>Show this screen.
+<tr><td> <b><tt>-K</tt></b> <td>Checksum files where available.
+<tr><td> <b><tt>-k</tt></b> <td>Do not checksum files.
+<tr><td colspan=2> <b><tt>-l <i>&lt;path&gt;</i></tt></b><tr><td><td>Path to ld.so to use.
+<tr><td colspan=2> <b><tt>-m <i>&lt;file&gt;</i></tt></b><tr><td><td>Use this file as a mountlist.
+<tr><td colspan=2> <b><tt>-M <i>&lt;/foo=/bar&gt;</i></tt></b><tr><td><td>Mount (redirect) /foo to /bar.
+<tr><td colspan=2> <b><tt>-N <i>&lt;name&gt;</i></tt></b><tr><td><td>Pretend that this is my hostname.
+<tr><td colspan=2> <b><tt>-o <i>&lt;file&gt;</i></tt></b><tr><td><td>Send debugging messages to this file.
+<tr><td colspan=2> <b><tt>-O <i>&lt;bytes&gt;</i></tt></b><tr><td><td>Rotate debug files of this size.
+<tr><td colspan=2> <b><tt>-p <i>&lt;host:port&gt;</i></tt></b><tr><td><td>Use this proxy server for HTTP requests.
+<tr><td> <b><tt>-Q</tt></b> <td>Inhibit catalog queries to list /chirp.
+<tr><td colspan=2> <b><tt>-r <i>&lt;repos&gt;</i></tt></b><tr><td><td>CVMFS repositories to enable (PARROT_CVMFS_REPO).
+<tr><td colspan=2> <b><tt>-R <i>&lt;cksum&gt;</i></tt></b><tr><td><td>Enforce this root filesystem checksum, where available.
+<tr><td> <b><tt>-s</tt></b> <td>Use streaming protocols without caching.
+<tr><td> <b><tt>-S</tt></b> <td>Enable whole session caching for all protocols.
+<tr><td colspan=2> <b><tt>-t <i>&lt;dir&gt;</i></tt></b><tr><td><td>Where to store temporary files.
+<tr><td colspan=2> <b><tt>-T <i>&lt;time&gt;</i></tt></b><tr><td><td>Maximum amount of time to retry failures.
+<tr><td colspan=2> <b><tt>-U <i>&lt;uid&gt;</i></tt></b><tr><td><td>Fake this unix uid; Real uid stays the same.
+<tr><td colspan=2> <b><tt>-u <i>&lt;name&gt;</i></tt></b><tr><td><td>Use this extended username.
+<tr><td> <b><tt>-v</tt></b> <td>Display version number.
+<tr><td> <b><tt>-w</tt></b> <td>Initial working directory.
+<tr><td> <b><tt>-W</tt></b> <td>Display table of system calls trapped.
+<tr><td> <b><tt>-Y</tt></b> <td>Force sYnchronous disk writes.
+</table>
+
+<h2>ENVIRONMENT VARIABLES</h2>
+<tt>parrot_run</tt> sets the environment variable <tt>PARROT_ENABLED</tt> to the value <tt>1</tt>
+for its child processes.  This makes it possible to set a visible flag in your shell prompt
+when <tt>parrot_run</tt> is enabled.
+
+<h2>EXIT STATUS</h2>
+<tt>parrot_run</tt> returns the exit status of the process that it runs.
+If <tt>parrot_run</tt> is unable to start the process, it will return non-zero.
+
+<h2>EXAMPLES</h2>
+To access a single remote file using <tt>vi</tt>:
+<pre>
+% parrot_run vi /anonftp/ftp.gnu.org/pub/README
+</pre>
+
+You can also run an entire shell inside of Parrot, like this:
+<pre>
+% parrot_run bash
+% cd /anonftp/ftp.gnu.org/pub
+% ls -la
+% cat README
+% exit
+</pre>
+
+To see the list of available Chirp servers around the world:
+<pre>
+% parrot_run ls -la /chirp
+</pre>
+
+<h2>COPYRIGHT</h2>
+
+The Cooperative Computing Tools are Copyright (C) 2003-2004 Douglas Thain and Copyright (C) 2005-2011 The University of Notre Dame.  This software is distributed under the GNU General Public License.  See the file COPYING for details.
+
+<h2>SEE ALSO</h2>
+
+<dir>
+<li> <a href="../index.html">Cooperative Computing Tools Documentation</a>
+<li> <a href="../parrot.html">Parrot User Manual</a>
+<li> <a href=parrot_run.html>parrot_run(1)</a>
+<li> <a href=parrot_run_hdfs.html>parrot_run_hdfs(1)</a>
+<li> <a href=parrot_cp.html>parrot_cp(1)</a>
+<li> <a href=parrot_getacl.html>parrot_getacl(1)</a>
+<li> <a href=parrot_setacl.html>parrot_setacl(1)</a>
+<li> <a href=parrot_mkalloc.html>parrot_mkalloc(1)</a>
+<li> <a href=parrot_lsalloc.html>parrot_lsalloc(1)</a>
+<li> <a href=parrot_locate.html>parrot_locate(1)</a>
+<li> <a href=parrot_timeout.html>parrot_timeout(1)</a>
+<li> <a href=parrot_whoami.html>parrot_whoami(1)</a>
+<li> <a href=parrot_md5.html>parrot_md5(1)</a>
+</dir>
+
+<p><hr>CCTools 3.4.2 released on 02/10/2012</body></html>
+

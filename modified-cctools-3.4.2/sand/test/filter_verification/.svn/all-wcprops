@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 77
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/filter_verification
+END
+cleanup.sh
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/filter_verification/cleanup.sh
+END
+gen_candidates.sh
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/filter_verification/gen_candidates.sh
+END
+gen_random_reads.pl
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/filter_verification/gen_random_reads.pl
+END
+gen_random_sequence.pl
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/filter_verification/gen_random_sequence.pl
+END
+verify_candidates.pl
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/monakos/!svn/ver/51/modified-cctools-3.4.2/sand/test/filter_verification/verify_candidates.pl
+END

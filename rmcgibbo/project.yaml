@@ -1,0 +1,34 @@
+forcefields:
+  - name: amber96
+    water: tip3p
+    driver: test_driver.py
+    output_extension: .xtc
+  - name: amber99sb-ildn
+    water: tip3p
+    driver: test_driver.py
+    output_extension: .xtc
+    
+pdb_topology_file: ala5.pdb
+method: explicit
+
+# MSM Builder Parameters
+metric:
+  type: !metric RMSD
+  init_kwargs:
+    atomindices: !array AtomIndices.dat, int
+clusterer:
+  type: !clusterer KCenters
+  init_kwargs:
+    distance_cutoff: 0.1
+    
+stride:                 1
+symmetrize:             None
+lagtime:                10
+trim:                   False
+cross_assign:           False
+adaptive_sampling:      even
+
+# Project settings
+project_dir: p1
+num_rounds: 100
+num_trajs_sufficient_for_round: 5

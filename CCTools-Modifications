@@ -1,0 +1,126 @@
+
+
+                             --- MSMAccelerator ---
+
+Authors:
+Robert McGibbon  <rmcgibbo@stanford.edu>
+TJ Lane          <tjlane@stanford.edu>
+
+Version:      0.1
+Last Update:  4/30/12
+
+
+DESCRIPTION
+
+MSMAccelerator is a platform for managing complex molecular dyanmics (MD) runs,
+and sythesizing the data into a statistical model known as a Markov State
+Model (MSM). MSMAccelerator is a cutting-edge tool that allows one to speed up
+this process by automatically managing a number of advantageous methods
+
+  (1) Adaptive Sampling:           Run trajectories where they are needed most
+  (2) Method/Forcefield Switching: Explore space with a cheap forcefield or
+                                   lossy sampling method (REMD, aMD, metadynamics,
+                                   ...) before refining the model with a better
+                                   method.
+  (3) Automatic MSM Construction:  MSMAccelerator will automatically build MSMs
+                                   on-the-fly, leaving you with a nice model to
+                                   work with as soon as you're done collecting
+                                   data.
+  (4) Trajectory Parallelism:      MSMAcceletor allows you to take advantage of
+                                   all available compute resouces at your 
+                                   disposal. It runs in the master-worker
+                                   paradigm, allowing you to parallelize over
+                                   many distributed computing resources.
+                                   
+
+For more scientific details, please see
+
+  < sweet publication >
+
+
+INSTALL
+
+Installation of MSMAccelerator should be as simple as
+
+  $ python setup.py build
+  $ python setup.py install (may need to be root)
+
+You may also need to install software on a remote machine where you plan to
+run workers. We have provided some instructions and helpful scripts in the
+cluster-tools/ directory.
+
+
+BASIC USAGE
+
+There are three things you need to get running to start an MSMAccelerator run:
+
+(1) Start MSMAccelerator on a master node. This should ideally be a stable, 
+dedicated, fairly powerful machine that does the job of directing workers, 
+building MSMs, and making decisions about how to sample.
+
+The central script that boots MSMAccelerator is simply called 'MSMAccelerator',
+and is automatically placed in your PATH during installation. The script takes
+a parameters file as it's primary input, and we've included more on that below.
+A typical command to get going would look like
+
+  $ MSMAccelerator -p my_first_parameters.yaml -f logfile.txt -P 5521
+
+But try
+
+  $ MSMAccelerator -h
+
+for more help.
+
+(2) Modify/Verify a driver script
+
+(3) The second is to start up a workers distributed across your compute
+resources. Some tools and instructions for how to do this are included
+in the cluster-tools/ directory. There are really only three essential steps:
+
+  (A) Install CCTools (WorkQueue specifically)
+  (B) Install your favorite MD code
+  (C) Start up a bunch of WorkQueue workers!
+
+That's it! If you did (1)-(3), you should have a run going with automatic
+MSM construction and optimal sampling being taken care of for you! Go get
+a coffee, kick up your heels, and enjoy.
+
+
+TUTORIAL
+
+We suggest running through the tutorial really fast before getting going. A
+simple tutorial has been included in the tutorial/ directory. This is also
+a good thing to try to ensure that everything got installed and is working well
+before trying a production run.
+
+
+SCRIPTS
+
+A number of useful scripts are included with MSMAccelerator. None are essential
+but many can make your life more fun/easy/interesting. Try running
+
+  $ <your favorite script> -h
+
+for a description and some help with how to use that script. Most of the
+scripts either monitor the progress or convergence of the current run, help
+keep workers running on many different clusters, etc.
+
+It should also be fairly straightforward to write new scripts!
+
+
+PARAMETERS
+
+Below is an enumeration of the possible parameter file values, along with a
+description of how to use them. Note that the parameter file follows standard
+YAML syntax.
+
+< Robert I may need some help - will do this later I think >
+
+
+FOLDING AT HOME
+
+Support for FAH workservers is planned, but not yet included. Coming soon!
+
+
+
+

@@ -1,0 +1,61 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html><head><title>ec2_remove_workers(1)</title></head><body><h1>ec2_remove_workers(1)</h1>
+<h2>NAME</h2>
+<b>ec2_remove_workers</b> - remove work_queue_worker instances on the Amazon EC2 service.
+
+<h2>SYNOPSIS</h2>
+<tt><b>ec2_remove_workers [options] <i>&lt;num-workers&gt;</i></b></tt>
+
+<h2>DESCRIPTION</h2>
+<tt>ec2_remove_workers</tt> removes <a href=work_queue_worker.html>work_queue_worker(1)</a> running on the Amazon EC2 service
+and deletes the EC2 instances running them. It calls EC2kill that is part of the EC2 API tools 
+to delete the EC2 instances.
+
+<h2>OPTIONS</h2>
+<table>
+<tr><td> <b><tt>-a</tt></b> <td>Remove all running workers and terminate their EC2 instances.
+<tr><td colspan=2> <b><tt>-i <i>&lt;image_id&gt;</i></tt></b><tr><td><td>EC2 OS image ID of instances running the workers. Default = ami-fa01f193.
+<tr><td> <b><tt>-h</tt></b> <td>Show help message.
+</table>
+
+<h2>EXIT STATUS</h2>
+On success, returns zero. On failure, returns non-zero.
+
+<h2>EXAMPLES</h2>
+Remove 10 work_queue_worker instances and delete the EC2 instances running them.
+<pre>
+ec2_remove_workers 10 
+</pre>
+
+<h2>COPYRIGHT</h2>
+The Cooperative Computing Tools are Copyright (C) 2003-2004 Douglas Thain and Copyright (C) 2005-2011 The University of Notre Dame.  This software is distributed under the GNU General Public License.  See the file COPYING for details.
+
+<h2>SEE ALSO</h2>
+<dir>
+<li> <a href="../index.html">Cooperative Computing Tools Documentation</a>
+<li> <a href="../workqueue.html">Work Queue User Manual</a>
+<li> <a href=work_queue_worker.html>work_queue_worker(1)</a>
+<li> <a href=work_queue_status.html>work_queue_status(1)</a>
+<li> <a href=work_queue_pool.html>work_queue_pool(1)</a>
+<li> <a href=condor_submit_workers.html>condor_submit_workers(1)</a>
+<li> <a href=sge_submit_workers.html>sge_submit_workers(1)</a>
+<li> <a href=ec2_submit_workers.html>ec2_submit_workers(1)</a>
+<li> <a href=ec2_remove_workers.html>ec2_remove_workers(1)</a>
+</dir>
+
+<p><hr>CCTools 3.4.2 released on 02/10/2012</body></html>
+

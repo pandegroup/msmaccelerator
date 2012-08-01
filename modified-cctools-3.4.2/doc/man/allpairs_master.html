@@ -1,0 +1,143 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html><head><title>allpairs_master(1)</title></head><body><h1>allpairs_master(1)</h1>
+
+<h2>NAME</h2>
+<b>allpairs_master</b> - executes All-Pairs workflow in parallel on distributed systems
+
+<h2>SYNOPSIS</h2>
+<tt><b>allparis_master [options] <i>&lt;set A&gt;</i> <i>&lt;set B&gt;</i> <i>&lt;compare function&gt;</i></b></tt>
+
+<h2>DESCRIPTION</h2>
+
+<b>allpairs_master</b> computes the Cartesian product of two sets
+(<b><i>&lt;set A&gt;</i></b> and <b><i>&lt;set B&gt;</i></b>), generating a matrix where each cell
+M[i,j] contains the output of the function F (<b><i>&lt;compare function&gt;</i></b>) on
+objects A[i] (an item in <b><i>&lt;set A&gt;</i></b>) and B[j] (an item in
+<b><i>&lt;set B&gt;</i></b>). The resulting matrix is displayed on the standard output,
+one comparison result per line along with the associated X and Y indices. 
+<p>
+<b>allpairs_master</b> uses the Work Queue system to distribute tasks among
+processors.  Each processor utilizes the <a href=allpairs_multicore.html>allpairs_multicore(1)</a> program
+to execute the tasks in parallel if multiple cores are present. After starting
+<b>allpairs_master</b>, you must start a number of <a href=work_queue_worker.html>work_queue_worker(1)</a>
+processes on remote machines.  The workers will then connect back to the master
+process and begin executing tasks.  
+
+<h2>OPTIONS</h2>
+
+<table>
+<tr><td colspan=2> <b><tt>-p <i>&lt;port&gt;</i></tt></b><tr><td><td>The port that the master will be listening on.
+<tr><td colspan=2> <b><tt>-e <i>&lt;args&gt;</i></tt></b><tr><td><td>Extra arguments to pass to the comparison function.
+<tr><td colspan=2> <b><tt>-f <i>&lt;file&gt;</i></tt></b><tr><td><td>Extra input file needed by the comparison function. (may be given multiple times)
+<tr><td colspan=2> <b><tt>-t <i>&lt;seconds&gt;</i></tt></b><tr><td><td>Estimated time to run one comparison. (default chosen at runtime)
+<tr><td colspan=2> <b><tt>-x <i>&lt;item&gt;</i></tt></b><tr><td><td>Width of one work unit, in items to compare. (default chosen at runtime)
+<tr><td colspan=2> <b><tt>-y <i>&lt;items&gt;</i></tt></b><tr><td><td>Height of one work unit, in items to compare. (default chosen at runtime)
+<tr><td colspan=2> <b><tt>-N <i>&lt;project&gt;</i></tt></b><tr><td><td>Report the master information to a catalog server with the project name - <i>&lt;project&gt;</i>
+<tr><td colspan=2> <b><tt>-E <i>&lt;priority&gt;</i></tt></b><tr><td><td>Priority. Higher the value, higher the priority.
+<tr><td colspan=2> <b><tt>-d <i>&lt;flag&gt;</i></tt></b><tr><td><td>Enable debugging for this subsystem. (Try -d all to start.)
+<tr><td> <b><tt>-v</tt></b> <td>Show program version.
+<tr><td> <b><tt>-h</tt></b> <td>Display this message.
+</table>
+
+<h2>EXIT STATUS</h2>
+On success, returns zero.  On failure, returns non-zero.
+
+<h2>EXAMPLES</h2>
+
+Let's suppose you have a whole lot of files that you want to compare all to
+each other, named <tt>a</tt>, <tt>b</tt>, <tt>c</tt>, and so on. Suppose that you also
+have a program named <b>compareit</b> that when invoked as <tt>compareit a b</tt>
+will compare files <tt>a</tt> and <tt>b</tt> and produce some output summarizing the
+difference between the two, like this: 
+
+<pre>
+ a b are 45 percent similar
+</pre>
+
+To use the allpairs framework, create a file called <tt>set.list</tt> that lists each of
+your files, one per line: 
+
+<pre>
+ a
+ b
+ c
+ ...
+</pre>
+
+Because <b>allpairs_master</b> utilizes <a href=allpairs_multicore.html>allpairs_multicore(1)</a>, so please
+make sure <a href=allpairs_multicore.html>allpairs_multicore(1)</a> is in your PATH before you proceed.To run
+a All-Pairs workflow sequentially, start a single <a href=work_queue_worker.html>work_queue_worker(1)</a>
+process in the background. Then, invoke <b>allpairs_master</b>. 
+
+<pre>
+ % work_queue_worker localhost 9123 &
+ % allpairs_master set.list set.list compareit
+</pre>
+
+The framework will carry out all possible comparisons of the objects, and print
+the results one by one (note that the first two columns are X and Y indices in
+the resulting matrix): 
+
+<pre>
+ 1	1	a a are 100 percent similar
+ 1	2	a b are 45 percent similar
+ 1	3	a c are 37 percent similar
+ ...
+</pre>
+
+To speed up the process, run more <a href=work_queue_worker.html>work_queue_worker(1)</a> processes on
+other machines, or use <a href=condor_submit_workers.html>condor_submit_workers(1)</a> or
+<a href=sge_submit_workers.html>sge_submit_workers(1)</a> to start hundreds of workers in your local batch
+system. 
+<p>
+The following is an example of adding more workers to execute a All-Pairs
+workflow. Suppose your <b>allpairs_master</b> is running on a machine named
+barney.nd.edu. If you have access to login to other machines, you could simply
+start worker processes on each one, like this:
+
+<pre>
+ % work_queue_worker barney.nd.edu 9123
+</pre>
+
+If you have access to a batch system like Condor, you can submit multiple
+workers at once:
+
+<pre>
+ % condor_submit_workers barney.nd.edu 9123 10
+ Submitting job(s)..........
+ Logging submit event(s)..........
+ 10 job(s) submitted to cluster 298.
+</pre>
+
+<h2>COPYRIGHT</h2>
+
+The Cooperative Computing Tools are Copyright (C) 2003-2004 Douglas Thain and Copyright (C) 2005-2011 The University of Notre Dame.  This software is distributed under the GNU General Public License.  See the file COPYING for details.
+
+<h2>SEE ALSO</h2>
+
+<dir>
+<li> <a href="http://www.nd.edu/~ccl/software/manuals">The Cooperative Computing Tools</a>
+<li> <a href="http://www.nd.edu/~ccl/software/manuals/allpairs.html">All-Pairs User Manual</a>
+<li> <a href="http://www.nd.edu/~ccl/software/manuals/workqueue.html">Work Queue User Manual</a>
+<li> <a href=work_queue_worker.html>work_queue_worker(1)</a>
+<li> <a href=condor_submit_workers.html>condor_submit_workers(1)</a>
+<li> <a href=sge_submit_workers.html>sge_submit_workers(1)</a>
+<li> <a href=allpairs_multicore.html>allpairs_multicore(1)</a>
+</dir>
+
+<p><hr>CCTools 3.4.2 released on 02/10/2012</body></html>
+

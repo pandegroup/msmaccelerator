@@ -1,0 +1,2 @@
+#!/bin/sh
+./configure --prefix /home/tjlane/cctools --with-python-path /home/tjlane/EPD/ --with-swig-path /home/tjlane/EPD/bin/
