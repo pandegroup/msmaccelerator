@@ -227,4 +227,5 @@ class QMaster(threading.Thread):
             raise
         
         traj.length = len(coordinates)
+        Session.commit()
         logger.info('Finished converting new traj to lh5 sucessfully')
