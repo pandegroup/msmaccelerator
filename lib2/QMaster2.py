@@ -14,7 +14,7 @@ import subprocess
 import logging
 
 import msmbuilder.Trajectory
-from models import Trajectory
+import models
 
 #set_debug_flag('debug')
 #set_debug_flag('wq')
