@@ -195,7 +195,7 @@ class QMaster(threading.Thread):
         else:
             self.logger.debug('Not requesting production_wet%s from driver (implicit)', traj.forcefield.output_extension)
         
-        task.specify_tag(traj.id)
+        task.specify_tag(str(traj.id))
         task.specify_algorithm(WORK_QUEUE_SCHEDULE_FILES) # what does this do?
         
         
@@ -205,8 +205,8 @@ class QMaster(threading.Thread):
     def on_return(self, task):
         """Called by main thread on the return of data from the workers.
         Post-processing"""
-        self.logger.info('Retrieved task %d', task.tag)
-        traj = self.db.query(models.Trajectory).get(task.tag)
+        self.logger.info('Retrieved task %s', task.tag)
+        traj = self.db.query(models.Trajectory).get(int(task.tag))
         
         try:
             # save lh5 version of the trajectory
