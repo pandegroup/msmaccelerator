@@ -158,15 +158,10 @@ class Builder(object):
             def LoadTraj(self, trj_index):
                 if trj_index < 0 or trj_index > len(trajs):
                     raise IndexError('Sorry')
-                    
-                print 'loading from' + trajs[trj_index].lh5_fn
                 val = msmbuilder.Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
-                print 'LOAD TRAJ {}'.format(trj_index)
-                print val
                 return val
         
         
-        print Project().LoadTraj(1)
         logger.info('Assigning...')
         assignments, distances = assign_in_memory(self.project.metric, generators, Project())
         
