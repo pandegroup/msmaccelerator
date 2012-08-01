@@ -154,7 +154,8 @@ class Builder(object):
                 self['TrajLengths'] = np.array([t.length for t in forcefield.trajectories])
             
             def load_traj(self, trj_index):
-                return msmbuilder.Trajectory.LoadTrajectoryFile(forcefield.trajectories[trj_index].lh5_fn)
+                val = msmbuilder.Trajectory.LoadTrajectoryFile(forcefield.trajectories[trj_index].lh5_fn)
+                print val
         
         logger.info('Assigning...')
         assignments, distances = assign_in_memory(self.project.metric, generators, Project())
