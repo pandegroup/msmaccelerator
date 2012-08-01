@@ -159,6 +159,8 @@ class Builder(object):
                 if trj_index < 0 or trj_index > len(trajs):
                     raise IndexError('Sorry')
                 val = msmbuilder.Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
+                print "#"*70
+                print type(val)
                 return val
         
         
