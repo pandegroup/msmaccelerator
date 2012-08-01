@@ -151,27 +151,18 @@ class Builder(object):
         trajs = Session.query(Trajectory).filter(Trajectory.returned_time != None).all()
         
         class BuilderProject(object):
-            def __init__(self, trajs):
-                self.trajs = trajs
-            def __getitem__(self, key):
-                print >> sys.stderr, key
-                
-                if key == 'NumTrajs':
-                    return len(self.trajs)
-                elif key == 'TrajLengths':
-                    return np.array([t.length for t in self.trajs])
+            def __init__(self):
+                self['NumTrajs'] = len(trajs)
+                self['TrajLengths'] = np.array([t.length for t in trajs])
             
             def LoadTraj(self, trj_index):
-                if trj_index < 0 or trj_index > len(self.trajs):
+                if trj_index < 0 or trj_index > len(trajs):
                     raise IndexError('Sorry')
-                val = msmbuilder.Trajectory.LoadTrajectoryFile(self.trajs[trj_index].lh5_fn)
-                
-                raise NotImplementedError('Sorry')
-                return val
+                return msmbuilder.Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
         
         
         logger.info('Assigning...')
-        assignments, distances = assign_in_memory(self.project.metric, generators, BuilderProject(trajs))
+        assignments, distances = assign_in_memory(self.project.metric, generators, BuilderProject())
         
         logger.info('Getting counts...')
         counts = self.construct_counts_matrix(assignments)
