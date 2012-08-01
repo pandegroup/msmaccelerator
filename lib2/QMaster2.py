@@ -164,8 +164,6 @@ class QMaster(threading.Thread):
         Session.add(traj)
         Session.commit()
         traj.populate_default_filenames()
-        print traj.init_pdb_fn
-        
         
         if not hasattr(traj, 'init_pdb'):
             raise ValueError('Traj is supposed to have a pdb object tacked on')            
@@ -183,9 +181,6 @@ class QMaster(threading.Thread):
             water=traj.forcefield.water,
             threads=traj.forcefield.threads))
         
-        traj.submit_time = time.time()
-        
-        traj.populate_default_filenames()
         
         #why does traj.forcefield.driver come out as unicode?
         task.specify_input_file(str(traj.forcefield.driver), remote_driver_fn)
@@ -205,6 +200,7 @@ class QMaster(threading.Thread):
         task.specify_tag(str(traj.id))
         task.specify_algorithm(WORK_QUEUE_SCHEDULE_FILES) # what does this do?
         
+        traj.submit_time = time.time()
         Session.commit()
         self.wq.submit(task)    
         logger.info('Submitted to queue: %s', traj)
