@@ -150,12 +150,15 @@ class QMaster(threading.Thread):
             raise Exception('Bad wakeup cause')
         return cause
     
-    def submit(self, traj_id):
+    def submit(self, traj_id, init_pdb):
         """ Submit a job to the work-queue for further sampling.
         
         Parameters
         ----------
-        traj_id : the id of the trajectory to submit to the work_queue
+        traj_id : int
+            the id of the trajectory to submit to the work_queue
+        init_pdb : msmbuilder.Trajectory
+            a pdb file
         """
         
         traj = self.db.query(models.Trajectory).get(traj_id)
@@ -164,11 +167,7 @@ class QMaster(threading.Thread):
         if traj.submit_time is not None:
             raise ValueError("This traj has already been submitted")
         traj.populate_default_filenames()
-        
-        
-        if not hasattr(traj, 'init_pdb'):
-            raise ValueError('Traj is supposed to have a pdb object tacked on')            
-        traj.init_pdb.SaveToPDB(traj.init_pdb_fn)
+        init_pdb.SaveToPDB(traj.init_pdb_fn)
         
         remote_driver_fn = os.path.split(traj.forcefield.driver)[1]
         remote_pdb_fn = 'input.pdb'

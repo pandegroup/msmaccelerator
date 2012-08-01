@@ -134,10 +134,9 @@ class Brain(object):
         
         trj = Trajectory(forcefield=forcefield,
             name=name, mode='Equilibration')
-        trj.init_pdb = conf
         self.db.add(trj)
         self.db.flush()
 
-        return trj.id
+        return trj.id, conf
         
         
