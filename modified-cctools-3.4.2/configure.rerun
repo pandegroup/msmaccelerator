@@ -1,2 +1,0 @@
-#!/bin/sh
-./configure --with-python-path /Library/Frameworks/EPD64.framework/Versions/Current/ --prefix /Users/rmcgibbo/local/cctools --with-swig-path /Library/Frameworks/EPD64.framework/Versions/Current/bin
