@@ -117,9 +117,9 @@ class Builder(object):
         # ======================================================================#
         # HERE IS WHERE THE ADAPTIVE SAMPLING ALGORITHMS NEED TO GET CALLED
         # NEED TO RE-DECIDE ON THE API
-        msmgroup.microstate_selection_weights = np.ones(msmgroup.n_states)
         for msm in msmgroup.markov_models:
             msm.model_selection_weight = 1
+            msm.microstate_selection_weights = np.ones(msmgroup.n_states)
         #=======================================================================#
 
         

@@ -56,13 +56,17 @@ class Brain(object):
         if msmgroup is None:
             return self._generate_equilibration_job()
         
-        # select the microstate from multinomial associated with the group
-        # of models, all on the same statespace
-        selected_microstate = multinomial(msmgroup.microstate_selection_weights)
+        # select the forcefield to shoot with
+        msm_i = multinomial([msm.model_selection_weight for msm in msmgroup.markov_models])
+        model_to_shoot_with = msmgroup.markov_models[msm_i]
+        forcefield = model_to_shoot_with.forcefield
+            
+        # select the microstate to pull from
+        selected_microstate = multinomial(model_to_shoot_with.microstate_selection_weights)
         
         # select the conformation to start from uniformly over all the confs
         # in that microstate. Note that these confs count come from any of the
-        # forcefields
+        # forcefields. This is why its critical to have the joint clustering
         confs_per_model = []
         for msm in msmgroup.markov_models:
             with open(msm.inverse_assignments_fn) as f:
@@ -77,9 +81,6 @@ class Brain(object):
         
         conf =  model_to_draw_from.trajectories[trj_i].extract_wet_frame(frame_i)
         
-        # select the forcefield to shoot with
-        msm_i = multinomial([msm.model_selection_weight for msm in msmgroup.markov_models])
-        forcefield = msmgroup.markov_models[msm_i].forcefield
         
         logger.info('Drew conformation from %s, shooting in %s', model_to_draw_from.forcefield.name, forcefield.name)
         if forcefield == model_to_draw_from.forcefield:

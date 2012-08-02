@@ -216,7 +216,7 @@ class MarkovModel(Base):
     # When selecting which forcefield to shoot from after a round, choose based
     # on a multinomial with this weight
     model_selection_weight = Column(Float)
-    
+    microstate_selection_weights = Column(PickleType)
     
     def __repr__(self):
         return "<MarkovModel(id={}, msm_group={}, forcefield={})>".format(self.id,
@@ -232,7 +232,6 @@ class MSMGroup(Base):
     __tablename__ = 'msm_groups'
     
     id = Column(Integer, primary_key=True)
-    microstate_selection_weights = Column(PickleType)
     generators_fn = Column(ASCII)
     n_states = Column(Integer)
     

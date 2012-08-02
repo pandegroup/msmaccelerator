@@ -3,8 +3,7 @@ import glob
 
 setup(name='msmaccelerator',
       version = '0.1',
-      packages = ['msmaccelerator', 'msmaccelerator.scripts'],
-      package_dir = {'msmaccelerator':'lib',
-                     'msmaccelerator.scripts': 'scripts'},
+      packages = ['msmaccelerator'],
+      package_dir = {'msmaccelerator':'lib'},
       scripts = glob.glob('scripts/'),
 )
