@@ -1,15 +1,24 @@
-import time
-import numpy as np
-import yaml
 import functools
 import collections
 from itertools import ifilterfalse
-from heapq import nsmallest
 from operator import itemgetter
-from msmbuilder import metrics
-from msmbuilder import clustering
 import logging
 import logging.handlers
+
+#http://stackoverflow.com/questions/1363839/python-singleton-object-instantiation
+class Singleton(type):
+    def __init__(self, name, bases, dict):
+        super(Singleton, self).__init__(name, bases, dict)
+        self.instance = None
+
+    def __call__(self, *args, **kw):
+        if self.instance is None:
+            self.instance = super(Singleton, self).__call__(*args, **kw)
+
+        return self.instance
+        
+        
+
 
 class GMailHandler(logging.handlers.SMTPHandler):
     "Logging handler to send email from an msmaccelerator account"
@@ -19,7 +28,7 @@ class GMailHandler(logging.handlers.SMTPHandler):
         gmail_user = 'msmaccelerator@gmail.com'
         gmail_password = 'thisisthepassword'
         empty_tuple = ()
-        
+
         logging.handlers.SMTPHandler.__init__(self, (mailhost, mailport),
             gmail_user, toaddrs, subject, (gmail_user, gmail_password), empty_tuple)
 

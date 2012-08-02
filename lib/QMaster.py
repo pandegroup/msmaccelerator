@@ -13,29 +13,38 @@ from Queue import LifoQueue
 import subprocess
 import logging
 
-from msmbuilder import Trajectory
+import msmbuilder.Trajectory
+import models
+from database import Session
 
+
+logger = logging.getLogger('MSMAccelerator.QMaster')
 #set_debug_flag('debug')
 #set_debug_flag('wq')
 
 class QMaster(threading.Thread):
     def __init__(self, project, port, log_freq=600): # 600 seconds
-        """Initialize the qmaster
+        """Initialize the QMaster
         
-        Arguments:
-        project_rootdir: string with the path to the project's root directory
-        log_status_frequency: integer: frequency to print info about the status of the work
-            queue. In units of seconds. Default is to print every 10 minutes.
+        Parameters
+        ----------
+        project : 
+        port : int
+        log_freq : int, optional
+            frequency to print info about the status of the work queue.
+            In units of seconds. Default is to print every 10 minutes.
         """
+        
         threading.Thread.__init__(self)
         self.project = project
+        
         self.log_freq = log_freq  # print time in seconds
         self.wake_freq = 1 # seconds
         
         self.wq = WorkQueue(port, name='MSMAccelerator', catalog=True, exclusive=False)
-        self.logger = logging.getLogger('MSMAccelerator.QMaster')
-        self.logger.info('WORK QUEUE MASTER LISTENING ON PORT: {0}'.format(self.wq.port))
-        self.logger.info('(Start a local worker with >> work_queue_worker -d all localhost {0} & )'.format(self.wq.port))
+
+        logger.info('WORK QUEUE MASTER LISTENING ON PORT: %d', self.wq.port)
+        logger.info('(Start a local worker with >> work_queue_worker -d all localhost %d & )', self.wq.port)
         
         # method controls whether or not we need to bring back solvated_xtc as well
         if self.project.method == 'explicit':
@@ -43,8 +52,8 @@ class QMaster(threading.Thread):
         elif self.project.method == 'implicit':
             self.return_wet_xtc = False
         else:
-            raise 
-        self.logger.info('Return wet xtc set to %s', self.return_wet_xtc)
+            raise Exception("project.method must be 'explicit' or 'implicit'")
+        logger.info('Return wet xtc set to %s', self.return_wet_xtc)
         
         # what does this specify algorithm do?
         self.wq.specify_algorithm(WORK_QUEUE_SCHEDULE_FCFS)
@@ -67,19 +76,17 @@ class QMaster(threading.Thread):
         """Main thread-loop for the QMaster thread"""
         last_print = time.time()
         
+        
         while True:
             time.sleep(self.wake_freq)
             
             if not self.wq.empty():
                 t = self.wq.wait(self.wake_freq)
                 if t:
-                    job_dict = pickle.loads(t.tag)
-                    job_dict['returned_time'] = time.time()
-                    job_dict['host'] = t.host
                     if t.return_status != 0:
-                        self.logger.error('Worker returned nonzero exit status for job: {0}'.format(str(job_dict)))
+                        logger.error('Worker returned nonzero exit status for job: %d', t.return_status)
                     else:
-                        self.on_return(job_dict)
+                        self.on_return(t)
                     self._mainloop_wake_event_cause = 'job returned'
                     self._mainloop_wake_event.set()
             
@@ -88,20 +95,39 @@ class QMaster(threading.Thread):
                 self._mainloop_wake_event.set() # also set the event if there are no tasks in the queue
 
             if self._stop.is_set():
-                self.logger.info('Recieved stop signal. Shutting down all workers')
+                logger.info('Recieved stop signal. Shutting down all workers')
                 self.wq.shutdown_workers(0) # 0 indicates to shut all of them down
                 sys.exit(0)
             
             if time.time() - last_print > self.log_freq:
-                self.logger.info('workers initialized: %d, ready: %d, busy: %d' % (self.wq.stats.workers_init, self.wq.stats.workers_ready, self.wq.stats.workers_busy))
-                self.logger.info('workers running: %d, waiting: %d, complete: %d' % (self.wq.stats.tasks_running, self.wq.stats.tasks_waiting, self.wq.stats.tasks_complete))
+                logger.info('workers initialized: %d, ready: %d, busy: %d', self.wq.stats.workers_init, self.wq.stats.workers_ready, self.wq.stats.workers_busy)
+                logger.info('workers running: %d, waiting: %d, complete: %d', self.wq.stats.tasks_running, self.wq.stats.tasks_waiting, self.wq.stats.tasks_complete)
                 last_print = time.time()
 
     def num_jobs_waiting(self):
+        """Number of jobs waiting to be sent out
+        
+        This number should be kept at 1, and when it drops to zero a new job
+        should be generated.
+        
+        Returns
+        -------
+        n : int
+            The number
+        """
         return self.wq.stats.tasks_waiting
 
     def num_jobs_in_queue(self):
-        """Get the number of jobs currently in the work queue"""
+        """Get the number of jobs currently in the work queue
+        
+        This includes both the jobs running remotely and the ones waiting
+        here
+        
+        Returns
+        -------
+        n : int
+            The number
+        """
         return self.wq.stats.tasks_running + self.wq.stats.tasks_waiting
         
     def stop(self):
@@ -109,135 +135,95 @@ class QMaster(threading.Thread):
         self._stop.set()
 
     def wait(self):
+        """Block until some sort of action happens in the main-thread loop.
+        
+        This call will return either when a job as returned from the workers,
+        or when the queue is empty (last job in the local queue has been sent
+        out)
+        
+        Returns
+        -------
+        wakeup_cause : str
+            Either 'job returned' or 'queue empty', depending on the reason
+        """
         self._mainloop_wake_event.wait()
         self._mainloop_wake_event.clear()
         cause = self._mainloop_wake_event_cause
-        assert cause in ['job returned', 'queue empty']
+        if not cause in ['job returned', 'queue empty']:
+            raise Exception('Bad wakeup cause')
         return cause
     
-    def submit(self, job):
+    def submit(self, traj):
         """ Submit a job to the work-queue for further sampling.
         
-        Job should be a dict containing at least the following fields
-        
-        'name': The name of the job
-        'conf': MSMBuilder Conformation object with the starting structure
-        'ff': Name of the forcefield to use. (string)
-        'water': Name of the water model to use (string)
-        
-        'mode': 'Production' or 'Equilibration'
-        'threads': Number of threads to use on target machine (int)
-        'driver': path to MD driver script (e.g. Monakos' gromacs_driver.py)
-        'output_extension': path to 
+        Parameters
+        ----------
         """
-        # if job is a list, submit each individually
-        if isinstance(job, list):
-            # submit the new jobs. We're submitting them to a LIFO queue,
-            # so we submit them in reverse order so that the first one
-            # the client submitted is on top
-            for j in job[::-1]:
-                self.submit(j)
-            return
+        if traj.submit_time is not None:
+            raise ValueError("This traj has already been submitted")
+        Session.add(traj)
+        Session.commit()
+        traj.populate_default_filenames()
         
-        # make sure that job contains the right fields
-        required = ['name', 'conf', 'ff', 'water', 'mode', 'threads', 'driver']
-        def confirm(item):
-            if not item in job:
-                raise KeyError('job needs to contain the key "%s"' % item)
-        map(confirm, required)
+        if not hasattr(traj, 'init_pdb'):
+            raise ValueError('Traj is supposed to have a pdb object tacked on')            
+        traj.init_pdb.SaveToPDB(traj.init_pdb_fn)
         
-        fileroot = str(np.random.randint(sys.maxint))
-        job['fileroot'] = fileroot
-
-        pdb_fn =  '%s.pdb' % fileroot
-        dry_xtc_fn = '%s_dry.xtc' % fileroot
-        wqlog_fn = '%s.wqlog' % fileroot
+        remote_driver_fn = os.path.split(str(traj.forcefield.driver))[1]
+        remote_pdb_fn = 'input.pdb'
+        remote_output_fn = 'production_dry{}'.format(traj.forcefield.output_extension)
         
-        xtc_dir = self.project.xtc_dir(job['ff'])
-        job['dry_xtc'] = os.path.join(xtc_dir, dry_xtc_fn)
-        job['last_wet_snapshot'] = os.path.join(self.project.last_snapshot_dir(job['ff']), pdb_fn)
-        job['wqlog'] = os.path.join(self.project.wqlog_dir(job['ff']), wqlog_fn)
-        job['pdb_fn'] = os.path.join(self.project.starting_conf_dir(job['ff']), pdb_fn)
-        shutil.move(job['conf'], job['pdb_fn'])
-        del job['conf']
+        task = Task('python ./{driver} {pdb_fn} {ff} {water} {mode} {threads}'.format(
+            pdb_fn=remote_pdb_fn,
+            mode=traj.mode,
+            driver=remote_driver_fn,
+            ff=traj.forcefield.name,
+            water=traj.forcefield.water,
+            threads=traj.forcefield.threads))
         
-        job['submit_time'] = time.time()
         
-        driver_fn = os.path.split(job['driver'])[1]
-        
-        task = Task('python ./%s %s %s %s %s %s > %s' % \
-                    (driver_fn, pdb_fn, job['ff'], job['water'], \
-                     job['mode'], job['threads'], wqlog_fn))
-        
-        task.specify_input_file(job['driver'], driver_fn)
-        task.specify_input_file(job['pdb_fn'], pdb_fn)
-        task.specify_output_file(job['wqlog'], 'logs/driver.log')
-        
-        # this is the xtc without water
-        remote_output_fn = 'production_dry%s' % job['output_extension']
-        task.specify_output_file(job['dry_xtc'], remote_output_fn)
+        #why does traj.forcefield.driver come out as unicode?
+        task.specify_input_file(str(traj.forcefield.driver), remote_driver_fn)
+        task.specify_output_file(traj.wqlog_fn, 'logs/driver.log')
+        task.specify_input_file(traj.init_pdb_fn, remote_pdb_fn)
+        task.specify_output_file(traj.dry_xtc_fn, remote_output_fn)
         
         if self.return_wet_xtc:
-            wet_xtc_fn = '%s_wet.xtc' % fileroot
             # this is the XTC file with waters, generated by the driver
             # when you're doing implicit solvent only, this stuff is not used.
-            remote_output_fn = 'production_wet%s' % job['output_extension']
-            job['wet_xtc'] = os.path.join(xtc_dir, wet_xtc_fn)
-            task.specify_output_file(job['wet_xtc'], remote_output_fn)
-            task.specify_output_file(job['last_wet_snapshot'], 'last_wet_snapshot.pdb')
+            remote_wet_output_fn = 'production_wet{}'.format(traj.forcefield.output_extension)
+            task.specify_output_file(traj.wet_xtc_fn, remote_wet_output_fn)
+            task.specify_output_file(traj.last_wet_snapshot_fn, 'last_wet_snapshot.pdb')
         else:
-            self.logger.debug('Not requesting production_wet%s from driver (implicit)' % job['output_extension'])
+            logger.debug('Not requesting production_wet%s from driver (implicit)', traj.forcefield.output_extension)
         
-        # pickle the job dict and set it as the tag of the wq task
-        task.specify_tag(pickle.dumps(job))
+        task.specify_tag(str(traj.id))
         task.specify_algorithm(WORK_QUEUE_SCHEDULE_FILES) # what does this do?
-        self.wq.submit(task)
         
-        self.logger.info('Submitted to queue: {0} ({1}, {2})'.format(fileroot, job['ff'], job['name']))
+        traj.submit_time = time.time()
+        Session.commit()
+        self.wq.submit(task)    
+        logger.info('Submitted to queue: %s', traj)
         
-    def on_return(self, job):
+    def on_return(self, task):
         """Called by main thread on the return of data from the workers.
         Post-processing"""
-        self.logger.info('Retrieved "{0}" xtc. Converting to lh5...'.format(job['name']))
+        logger.info('Retrieved task %s', task.tag)
+        traj = Session.query(models.Trajectory).get(int(task.tag))
         
         try:
             # save lh5 version of the trajectory
-            traj_dir = self.project.traj_dir(job['ff'])
-            trajnum = len(glob(os.path.join(traj_dir, '*.lh5')))
-            lh5_fn = os.path.abspath(os.path.join(traj_dir, '%d.lh5' % trajnum))
-            conf = Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
-            traj = Trajectory.LoadTrajectoryFile(job['dry_xtc'], Conf=conf)
-            traj.SaveToLHDF(lh5_fn)
+            conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
+            coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(str(traj.dry_xtc_fn), Conf=conf)
+            coordinates.SaveToLHDF(str(traj.lh5_fn))
         
         except Exception as e:
-            self.logger.error('When postprocessing {0}, convert to lh5 failed!'.format(str(job)))
-            self.logger.exception(e)
+            logger.error('When postprocessing %s, convert to lh5 failed!', traj)
+            logger.exception(e)
             raise
         
-        # create softlink to the lh5 trajectory in the JointFF directory
-        softlink_dir = self.project.traj_dir(self.project.joint_ff['name'])
-        
-        softlink_num = len(glob(os.path.join(softlink_dir, '*.lh5')))
-        softlink_fn = os.path.join(softlink_dir, '%d.lh5' % softlink_num)
-        os.symlink(lh5_fn, softlink_fn)
-
-        # update the TrajLog file
-        job['AllFF_fn'] = softlink_fn
-        job['lh5_fn'] = lh5_fn
-        job['TrajLength'] = len(traj)
-        job['lh5_trajnum'] = trajnum
-        self.project.traj_log_add(job)
-        self.logger.info('Finished converting new traj to lh5 sucessfully')
-    
-if __name__ == '__main__':
-    q = QMaster('.')
-    job = {'name': 'testjob3',
-           'driver': 'python /home/rmcgibbo/monakos/drivers/GROMACS/gromacs_driver.py',
-           'conf': Trajectory.LoadFromPDB('/home/rmcgibbo/monakos/drivers/GROMACS/ala5.pdb'),
-           'ff': 'amber99sb-ildn',
-           'water': 'tip3p',
-           'mode': 'equilibration',
-           'threads': 8}
-    
-    q.submit(job)
-    q.stop()
+        traj.host = task.host
+        traj.returned_time = time.time()
+        traj.length = len(coordinates)
+        Session.commit()
+        logger.info('Finished converting new traj to lh5 sucessfully')
