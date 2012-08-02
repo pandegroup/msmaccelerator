@@ -5,6 +5,8 @@ from monakos import Builder, Project
 from Emsmbuilder.Trajectory import Trajectory
 from argparse import ArgumentParser
 
+raise NotImplementedError('Sorry')
+
 parser = ArgumentParser('Monakos: Force the builder to run a round with the current data')
 parser.add_argument('params_fn', help='Monakos Paramters File (yaml)')
 args = parser.parse_args()

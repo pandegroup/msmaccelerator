@@ -2,16 +2,11 @@ from work_queue import Task, WorkQueue, set_debug_flag
 from work_queue import WORK_QUEUE_SCHEDULE_FCFS
 from work_queue import WORK_QUEUE_SCHEDULE_FILES
 import time
-from glob import glob
-import yaml
 import os, sys
-import shutil
-import numpy as np
 import threading
 import cPickle as pickle
-from Queue import LifoQueue
-import subprocess
 import logging
+from datetime import datetime
 
 import msmbuilder.Trajectory
 import models
@@ -200,7 +195,7 @@ class QMaster(threading.Thread):
         task.specify_tag(str(traj.id))
         task.specify_algorithm(WORK_QUEUE_SCHEDULE_FILES) # what does this do?
         
-        traj.submit_time = time.time()
+        traj.submit_time = datetime.now()
         Session.commit()
         self.wq.submit(task)    
         logger.info('Submitted to queue: %s', traj)
@@ -223,7 +218,7 @@ class QMaster(threading.Thread):
             raise
         
         traj.host = task.host
-        traj.returned_time = time.time()
+        traj.returned_time = datetime.now()
         traj.length = len(coordinates)
         Session.commit()
         logger.info('Finished converting new traj to lh5 sucessfully')

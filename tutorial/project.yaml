@@ -1,17 +1,14 @@
 forcefields:
-  -
-    name: amber99sb-ildn
+  - name: amber96
+    water: tip3p
+    driver: test_driver.py
+    output_extension: .xtc
+    threads: 8
+  - name: amber99sb-ildn
     water: tip3p
     driver: test_driver.py
     threads: 8
-    cost: 1
-    gold_standard: True
     output_extension: .xtc
-    # driver is expected to produce files called production_wet.xtc
-    # production_dry.xtc, and last_wet_snapshot.pdb
-    # Note that for method: explicit with output_extension: .dcd, you need to
-    # be using at least msmbuilder revision 900, which added some dcd
-    # functionality (loading individual frames)
 
 # if you supply a starting_confs_lh5, then the initial jobs will be generated
 # by randomly selecting conformations from that trajectory. Otherwise, all

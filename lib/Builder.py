@@ -1,8 +1,10 @@
 import sys, os
 import re
 import numpy as np
-from scipy import io
 import logging
+import cPickle as pickle
+import scipy.io
+from collections import defaultdict
 
 # msmbuilder imports
 from msmbuilder.MSMLib import GetCountMatrixFromAssignments
@@ -13,6 +15,7 @@ import msmbuilder.Trajectory
 import msmbuilder.Serializer
 from msmbuilder.assigning import assign_in_memory
 
+from sqlalchemy.sql import and_, or_
 from models import Trajectory, Forcefield, MarkovModel, MSMGroup
 from database import Session
 logger = logging.getLogger('MSMAccelerator.Builder')
@@ -47,20 +50,19 @@ class Builder(object):
             # the number of unique trajectories that are part of this msmgroup
             # by constructing a query for the union of trajectories in any of the msms
             # in the msm group
-            q = Session.query(Trajectory)
+            clauses = []
             for msm in msmgroup.markov_models:
-                q2 = Session.query(Trajectory)
-                q2.filter(Trajectory.markov_models.contains(msm))
-                q2.filter(Trajectory.returned_time != None)
-                q.union(q2)
-            n_built = q.count()
-            print q.all()
-            ei
+                clauses.append(Trajectory.markov_models.contains(msm))
+            
+            q = Session.query(Trajectory).filter(and_(or_(*clauses),
+                Trajectory.returned_time != None))
+            
+            n_built = q.distinct().count()
         
         # number of trajs in the database
         n_total = Session.query(Trajectory).filter(Trajectory.returned_time != None).count()
         
-        truth = n_total > n_built + self.project.num_trajs_sufficient_for_round
+        truth = n_total >= n_built + self.project.num_trajs_sufficient_for_round
         
         logger.info("%d trajs total, %d trajs built. Sufficient? %s", n_total, n_built, truth)
         return truth
@@ -97,12 +99,32 @@ class Builder(object):
         msmgroup = MSMGroup()
         for ff in Session.query(Forcefield).all():
             msm = self.build_msm(ff, generators=generators)
-            msmgroup.markov_models.append(msm)
-        
+            if msm is not None:
+                msmgroup.markov_models.append(msm)
         Session.add(msmgroup)
         Session.flush()
-        logger.info("Round completed sucessfully")
         
+        for msm in msmgroup.markov_models:
+            msm.populate_default_filenames()
+            scipy.io.mmwrite(msm.counts_fn, msm.counts)
+            msmbuilder.Serializer.SaveData(msm.assignments_fn, msm.assignments)
+            msmbuilder.Serializer.SaveData(msm.distances_fn, msm.distances)
+            pickle.dump(invert_assignments(msm.assignments), open(msm.inverse_assignments_fn, 'w'))
+            
+        
+        msmgroup.n_states = len(generators)
+        
+        # ======================================================================#
+        # HERE IS WHERE THE ADAPTIVE SAMPLING ALGORITHMS NEED TO GET CALLED
+        # NEED TO RE-DECIDE ON THE API
+        msmgroup.microstate_selection_weights = np.ones(msmgroup.n_states)
+        for msm in msmgroup.markov_models:
+            msm.model_selection_weight = 1
+        #=======================================================================#
+
+        
+        Session.commit()        
+        logger.info("Round completed sucessfully")
         return True
         
         
@@ -149,6 +171,8 @@ class Builder(object):
         # I want to use assign_in_memory, which requires an msmbuilder.Project
         # so, lets spoof it
         trajs = Session.query(Trajectory).filter(Trajectory.returned_time != None).all()
+        if len(trajs) == 0:
+            return None
         
         class BuilderProject(dict):
             def __init__(self):
@@ -168,10 +192,12 @@ class Builder(object):
         counts = self.construct_counts_matrix(assignments)
         
         
-        raise NotImplementedError("We need to save these guys to disk")
-        return MarkovModel(counts=counts, assignments=assignments, distances=distances,
-            forcefield=forcefield, trajectories=trajs)
-            
+        model = MarkovModel(forcefield=forcefield, trajectories=trajs)
+        model.counts = counts
+        model.assignments = assignments
+        model.distances = distances
+        
+        return model
         
         
     def construct_counts_matrix(self, assignments):
@@ -213,3 +239,16 @@ class Builder(object):
         
         return counts
 
+
+# UTILITY FUNCTION
+# THIS SHOULD REALLY BE INSIDE MSMBUILDER
+def invert_assignments(assignments):
+    inverse_assignments = defaultdict(lambda:  [])
+    for i in xrange(assignments.shape[0]):
+        for j in xrange(assignments.shape[1]):
+            if assignments[i,j] != -1:
+                inverse_assignments[assignments[i,j]].append((i,j))
+    for key, value in inverse_assignments.items():
+        inverse_assignments[key] = np.array(value)
+        
+    return dict(inverse_assignments)

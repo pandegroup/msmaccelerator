@@ -1,5 +1,6 @@
 # DECLARE MODELS
 import os
+import numpy as np
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import types
@@ -9,7 +10,7 @@ Base = declarative_base()
 STRING_LEN = 500
 
 import msmbuilder.Trajectory
-from Project2 import Project
+from msmaccelerator.Project import Project
 
 class ASCII(types.TypeDecorator):
     impl = types.String
@@ -70,7 +71,7 @@ class Trajectory(Base):
     def default_lh5_fn(self):
         return self.__basefn() + 'LH5s/{id}.lh5'.format(id=self.id)
     def default_last_wet_snapshot_fn(self):
-        return self.__basefn() + 'LastWetSnapshots/{id}.lh5'.format(id=self.id)
+        return self.__basefn() + 'LastWetSnapshots/{id}.pdb'.format(id=self.id)
 
     def populate_default_filenames(self):
         if self.id is None:
@@ -96,9 +97,12 @@ class Trajectory(Base):
     host = Column(ASCII)
     mode = Column(ASCII)
     name = Column(ASCII)
-    returned_time = Column(Float)
-    submit_time = Column(Float)
+    returned_time = Column(DateTime)
+    submit_time = Column(DateTime)
     length = Column(Integer) # in frames
+
+    initialized_from_id = Column(Integer)
+    initialized_from_frame = Column(Integer)
     
     # many to one relationship
     forcefield_id = Column(Integer, ForeignKey('forcefields.id'))
@@ -123,11 +127,11 @@ class Trajectory(Base):
         """
         
         if self.wet_xtc_fn is not None:
-            conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.last_wet_snapshot_fn)
-            xyz = msmbuilder.Trajectory.ReadFrame(self.wet_xtc_fn, frame_index)
+            conf = msmbuilder.Trajectory.LoadTrajectoryFile(str(self.last_wet_snapshot_fn))
+            xyz = msmbuilder.Trajectory.ReadFrame(str(self.wet_xtc_fn), frame_index)
         else:
             conf = msmbuilder.Trajectory.LoadTrajectoryFile(Project().pdb_topology_file)
-            xyz = msmbuilder.Trajectory.ReadFrame(xtc_path, frame_index)
+            xyz = msmbuilder.Trajectory.ReadFrame(str(xtc_path), frame_index)
 
         if not (xyz.shape == conf['XYZList'][0,:,:].shape):
             raise Exception("Number of atoms is wrong: xyz.shape={0}, conf['XYZList'][0,:,:].shape={1}".format(xyz.shape, conf['XYZList'][0,:,:].shape))
@@ -150,7 +154,48 @@ class MarkovModel(Base):
     id = Column(Integer, primary_key=True)
     counts_fn = Column(ASCII)
     assignments_fn = Column(ASCII)
+    distances_fn = Column(ASCII)
     inverse_assignments_fn = Column(ASCII)
+    
+    # I'm putting the id in the default filename to guard against of off chance
+    # that two MarkovModels with the same forcefied in the same round get created
+    # and then they would otherwise be given the same filenames
+    def __basefn(self):
+        return '{base}/models/{ff}/{round}/'.format(base=Project.instance.project_dir,
+            ff=self.forcefield.name, round=self.msm_group_id)
+    def default_counts_fn(self):
+        return self.__basefn() + 'tCounts.{id}.mtx'.format(id=self.id)
+    def default_assignments_fn(self):
+        return self.__basefn() + 'Assignments.{id}.h5'.format(id=self.id)
+    def default_distances_fn(self):
+        return self.__basefn() + 'Distances.{id}.h5'.format(id=self.id)
+    def default_inverse_assignments_fn(self):
+        return self.__basefn() + 'InvAssignmnets.{id}.pickl'.format(id=self.id)
+    
+    def populate_default_filenames(self):
+        if self.id is None:
+            raise Exception(('self.id is None!. Did you forget to commit before '
+                'calling this method?'))
+        if self.forcefield is None:
+            raise Exception()
+        if self.msm_group_id is None:
+            raise Exception()
+                
+        for name in ['counts_fn', 'assignments_fn', 'inverse_assignments_fn',
+            'distances_fn']:
+            if getattr(self, name) is None:
+                # call the method
+                default = getattr(self, 'default_' + name)()
+                # set the field
+                setattr(self, name, default)
+                
+                #just to be safe, lets make the directories if they dont exist
+                try:
+                    os.makedirs(os.path.split(default)[0])
+                except OSError:
+                    pass
+    
+    
     
     forcefield_id = Column(Integer, ForeignKey('forcefields.id'))
     forcefield = relationship("Forcefield", backref=backref('markov_models',
@@ -187,9 +232,10 @@ class MSMGroup(Base):
     __tablename__ = 'msm_groups'
     
     id = Column(Integer, primary_key=True)
-    
-    generators_fn = Column(ASCII)
     microstate_selection_weights = Column(PickleType)
+    generators_fn = Column(ASCII)
+    n_states = Column(Integer)
+    
 
     def __repr__(self):
         return "<BuildRound(id={})>".format(self.id)

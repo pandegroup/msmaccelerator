@@ -8,8 +8,7 @@ sleep_time: 600            # interval at which to check the servers (seconds)
 # Now, list the servers
 # you need to be able to $ ssh <username>@<name> without a password for each
 servers:
--
-  name:             certainty
+- name:             certainty
   username:         tjlane
   target_jobs:      8
   command:          pbs_submit_workers
@@ -18,8 +17,7 @@ servers:
   ppn:              24
   workers_per_node: 3
 
--
-  name:             corn
+- name:             corn
   username:         tjlane
   target_jobs:      0
   command:          sge_submit_workers
