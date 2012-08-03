@@ -115,11 +115,28 @@ class Builder(object):
         msmgroup.n_states = len(generators)
         
         # ======================================================================#
-        # HERE IS WHERE THE ADAPTIVE SAMPLING ALGORITHMS NEED TO GET CALLED
-        # NEED TO RE-DECIDE ON THE API
-        for msm in msmgroup.markov_models:
-            msm.model_selection_weight = 1
-            msm.microstate_selection_weights = np.ones(msmgroup.n_states)
+        # HERE IS WHERE THE ADAPTIVE SAMPLING ALGORITHMS GET CALLED
+        # The obligation of the adaptive_sampling routine is to set the
+        # model_selection_weight on each MSM/forcefield and the microstate
+        # selection weights
+        self.project.adaptive_sampling(Session, msmgroup)
+        
+        # check to make sure that the right fields were populated
+        try:
+            for msm in msmgroup.markov_models:
+                if not isinstance(msm.model_selection_weight, float):
+                    raise ValueError('model selection weight on %s not set correctly' % msm)
+                if not isinstance(msm.microstate_selection_weights, np.ndarray):
+                    raise ValueError('microstate_selection_weights on %s not set correctly' % msm)
+        except ValueError:
+            logger.error('ERROR in adaptive sampling. Cleaning up db...')
+            for msm in msmgroup.markov_models:
+                os.unlink(msm.counts_fn)
+                os.unlink(msm.assignments_fn)
+                os.unlink(msm.distances_fn)
+                os.unlink(msm.inverse_assignments_fn)
+            raise
+        
         #=======================================================================#
 
         
@@ -232,7 +249,7 @@ class Builder(object):
         elif self.project.symmetrize == 'mle':
             logger.debug('MLE symmetrizing')
             counts = EstimateReversibleCountMatrix(counts)
-        elif self.project.symmetrize.lower() == 'none' or self.project.symmetrize == None:
+        elif self.project.symmetrize == 'none' or (not self.project.symmetrize):
             logger.debug('Skipping symmetrization')
         else:
             raise ValueError("Could not understand symmetrization method: %s" % self.project.symmetrize)

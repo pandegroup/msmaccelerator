@@ -10,20 +10,21 @@ from msmbuilder.Trajectory import Trajectory
 from sqlalchemy import create_engine
 
 import models
+import sampling
 from utils import Singleton
 from database import Session
 
-#
-# SINGLETON OBJECT
-#
-# The first time that this object gets created, the __init__
-# method will run, but subsequently, calls to Project() will
-# just get you the same copy of the object back. We only want
-# one copy of the Project around at once, because we want everything
-# to have the same database connection
-      
+
 class Project(object):
     __metaclass__ = Singleton
+    # SINGLETON OBJECT
+    #
+    # The first time that this object gets created, the __init__
+    # method will run, but subsequently, calls to Project() will
+    # just get you the same copy of the object back. We only want
+    # one copy of the Project around at once, because we want everything
+    # to have the same database connection
+    
     
     def __init__(self, params_fn):
         """Load up by parse the yaml parameter file"""
@@ -78,20 +79,28 @@ class Project(object):
         self.symmetrize = params['symmetrize']
         self.lagtime = params['lagtime']
         self.trim = params['trim']
-        self.adaptive_sampling = params['adaptive_sampling']
         self.n_rounds = params['num_rounds']
         self.project_dir = params['project_dir']
         self.num_trajs_sufficient_for_round = params['num_trajs_sufficient_for_round']
-
-        if not self.method in ['implicit', 'explicit']:
-            raise ValueError()
-        if not os.path.exists(self.project_dir):
-            os.makedirs(self.project_dir)
-            
+        
+        self.adaptive_sampling = getattr(sampling, params['adaptive_sampling'])
+        
+        self.__validate()
         self.__connect_to_db()
         self.add_forcefields_to_db(params['forcefields'])
         
-
+    
+    def __validate(self):
+        if not self.method in ['implicit', 'explicit']:
+            raise ValueError(self.method)
+            
+        if not os.path.exists(self.project_dir):
+            os.makedirs(self.project_dir)
+            
+        if not self.symmetrize in ['mle', 'transpose', False, None]:
+            raise ValueError(self.symmetrize)
+            
+            
     def __connect_to_db(self):       
         db_path =  os.path.join(self.project_dir, 'db.sqlite')
         engine = create_engine('sqlite:///{}'.format(db_path), echo=False)
@@ -106,7 +115,7 @@ class Project(object):
                 obj = models.Forcefield(name=ff['name'], water=ff['water'],
                     driver=os.path.join(self.params_dir, ff['driver']),
                     output_extension=ff['output_extension'],
-                    threads=ff['threads'])
+                    threads=ff['threads'], cost=ff['cost'])
                     
                 Session.add(obj)
 

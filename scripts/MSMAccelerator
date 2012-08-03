@@ -18,25 +18,25 @@ def setup_logger(file_level, email_level, filename, email_addrs, email_subject='
         gmail_handler.setFormatter(formatter)
         logger.addHandler(gmail_handler)
     
-    file_handler = logging.FileHandler(filename)
-    file_handler.setLevel(file_level)
-    file_handler.setFormatter(formatter)
-    
+    if not filename:
+        file_handler = logging.FileHandler(filename)
+        file_handler.setLevel(file_level)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+        
     console_handler = logging.StreamHandler()
     console_handler.setLevel(file_level)
     console_handler.setFormatter(formatter)
     
-    logger.addHandler(file_handler)
     
     return logger
     
 def main():
-
     # Parse arguments
     parser = arglib.ArgumentParser(description='MSMAccelerator: Adaptive Sampling Markov State Model Molecular Dynamics')
     parser.add_argument('project_filename', description='MSMAccelerator Project File (.yaml)')
     parser.add_argument('port', description='Port for work queue to send jobs on.', default=5521, type=int)
-    parser.add_argument('file_log', description='Filename to log to')
+    parser.add_argument('file_log', description='Filename to log to', default=False)
     parser.add_argument('email_log', description='Email address(es) to send log events to', nargs='+', type=list, default=[])
     parser.add_argument('file_level', description='Log level for file',
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='INFO')

@@ -35,6 +35,7 @@ class Forcefield(Base):
     water = Column(ASCII)
     driver = Column(ASCII)
     threads = Column(Integer)
+    cost = Column(Float)
     output_extension = Column(ASCII)
         
     def __repr__(self):
