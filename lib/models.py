@@ -22,6 +22,7 @@ class _PopulateMixin(object):
         
         for name, val in self.__dict__.items():
             if name.endswith('_fn') and isinstance(val, InstrumentedAttribute):
+                print 'populating', name
                 # call the method
                 default = getattr(self, 'default_' + name)()
                 # set the field
