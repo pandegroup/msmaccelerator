@@ -60,13 +60,13 @@ class Builder(object):
         # 
         # # number of trajs in the database
         # n_total = Session.query(Trajectory).filter(Trajectory.returned_time != None).count()
-        q = Session.query(MSMGroup)
-        msmgroup = q.order_by(MSMGroup.id.desc()).first()
+        qg = Session.query(MSMGroup)
+        msmgroup = qg.order_by(MSMGroup.id.desc()).first()
         
-        q = Session.query(Trajectories)
-        n_built = q.filter(Trajectory.msm_groups.contains(msmgroup)).count()
+        qt = Session.query(Trajectory)
+        n_built = qt.filter(Trajectory.msm_groups.contains(msmgroup)).count()
         
-        n_total = q.filter(Trajectory.returned_time != None).count()
+        n_total = qt.filter(Trajectory.returned_time != None).count()
         
         truth = n_total >= n_built + self.project.num_trajs_sufficient_for_round
         
