@@ -9,6 +9,7 @@ from sqlalchemy import (Column, Integer, String, DateTime,
 Base = declarative_base()
 STRING_LEN = 500
 
+import Project
 import msmbuilder.Trajectory
 
 class ASCII(types.TypeDecorator):
@@ -238,5 +239,3 @@ class MSMGroup(Base):
 
     def __repr__(self):
         return "<BuildRound(id={})>".format(self.id)
-
-from msmaccelerator import Project
