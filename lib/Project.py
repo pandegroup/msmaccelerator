@@ -122,8 +122,6 @@ class Project(object):
                     
                 Session.add(obj)
 
-            Session.commit()
-
         else:
             print "NOTE: I'M NOT PARSING NEW FORCEFIELDS"
         
