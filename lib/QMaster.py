@@ -224,5 +224,5 @@ class QMaster(threading.Thread):
         traj.host = task.host
         traj.returned_time = datetime.now()
         traj.length = len(coordinates)
-        Session.flush()
+        Session.commit()
         logger.info('Finished converting new traj to lh5 sucessfully')
