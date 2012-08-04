@@ -20,7 +20,7 @@ def myfavorite(Session, msmgroup):
             else:
                 msm.model_selection_weight = 1
             even_sampling(Session, msm)
-        
+        return
         
     # number of new states discovered
     n_new = msmgroup.n_states - prev.n_states
