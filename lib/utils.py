@@ -14,6 +14,8 @@ def load_file(path):
     
     .mtx, .h5, .lh5, .pdb, .pickle
     """
+    path = str(path)
+    
     ext = os.path.splitext(path)[1]
     if ext == '.mtx':
         return scipy.io.mmread(path)
@@ -31,6 +33,7 @@ def save_file(path, value):
     
     .mtx, .h5, .lh5, .xtc, .pdb, .pickl
     """
+    path = str(path)
     ext = os.path.splitext(path)[1]
     if ext == '.mtx':
         return scipy.io.mmwrite(path, value)

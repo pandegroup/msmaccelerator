@@ -11,6 +11,7 @@ from datetime import datetime
 import msmbuilder.Trajectory
 import models
 from database import Session
+from utils import save_file, load_file
 
 
 logger = logging.getLogger('MSMAccelerator.QMaster')
@@ -162,7 +163,7 @@ class QMaster(threading.Thread):
         
         if not hasattr(traj, 'init_pdb'):
             raise ValueError('Traj is supposed to have a pdb object tacked on')            
-        traj.init_pdb.SaveToPDB(traj.init_pdb_fn)
+        save_file(traj.init_pdb_fn, traj.init_pdb)
         
         remote_driver_fn = os.path.split(str(traj.forcefield.driver))[1]
         remote_pdb_fn = 'input.pdb'
@@ -210,7 +211,7 @@ class QMaster(threading.Thread):
             # save lh5 version of the trajectory
             conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
             coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(str(traj.dry_xtc_fn), Conf=conf)
-            coordinates.SaveToLHDF(str(traj.lh5_fn))
+            save_file(traj.lh5_fn, coordinates)
         
         except Exception as e:
             logger.error('When postprocessing %s, convert to lh5 failed!', traj)
