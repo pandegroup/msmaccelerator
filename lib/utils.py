@@ -27,7 +27,7 @@ def load_file(path):
     elif ext == '.pickl':
         return pickle.load(open(path))
     else:
-        raise NotImplementedError
+        raise NotImplementedError(ext)
 
 def save_file(path, value):
     """Save a file
