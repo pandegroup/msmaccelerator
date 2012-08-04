@@ -82,6 +82,11 @@ class Project(object):
         self.n_rounds = params['num_rounds']
         self.project_dir = params['project_dir']
         self.num_trajs_sufficient_for_round = params['num_trajs_sufficient_for_round']
+        self.mysql_user = params['mysql_user']
+        self.mysql_password = params.pop('mysql_password', '')
+        self.mysql_db = params['mysql_db']
+        self.mysql_host = params['mysql_host']
+        
         
         self.adaptive_sampling = getattr(sampling, params['adaptive_sampling'])
         
@@ -102,8 +107,9 @@ class Project(object):
             
             
     def __connect_to_db(self):       
-        db_path =  os.path.join(self.project_dir, 'db.sqlite')
-        engine = create_engine('sqlite:///{}'.format(db_path), echo=False)
+        db_path = "mysql://{}:{}@{}/{}".format(self.mysql_user, self.mysql_password,
+            self.mysql_host, self.mysql_db)
+        engine = create_engine(db_path, echo=False)
         Session.configure(bind=engine)
         models.Base.metadata.create_all(engine) 
         

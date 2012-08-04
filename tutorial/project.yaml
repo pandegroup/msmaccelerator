@@ -51,3 +51,8 @@ trim:                   False
 project_dir: p1
 num_rounds: 100
 num_trajs_sufficient_for_round: 1
+
+mysql_host: localhost
+mysql_user: root
+mysql_password: ''
+mysql_db: msmaccelerator
