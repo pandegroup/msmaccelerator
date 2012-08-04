@@ -11,19 +11,14 @@ def myfavorite(Session, msmgroup):
     # =============#
     k_factor = -100
     # =============#
-           
     prev = Session.query(MSMGroup).get(msmgroup.id - 1)
     if prev is None:
-        for msm in msmgroup.markov_models:
-            if msm.forcefield.true_kinetics:
-                msm.model_selection_weight = 0
-            else:
-                msm.model_selection_weight = 1
-            even_sampling(Session, msm)
-        return
-        
+        return default(Session, msmgroup)
+    
     # number of new states discovered
     n_new = msmgroup.n_states - prev.n_states
+    if n_new < 0:
+        return default(Session, msmgroup)
     
     # all trajectories in current model
     clause = lambda msm: Trajectory.markov_models.contains(msm)
