@@ -20,11 +20,13 @@ class _PopulateMixin(object):
             raise Exception(('self.id is None!. Did you forget to commit before '
                 'calling this method?'))
         
-        # look for Columns that end with "_fn"
+        # look for Columns that end with "_fn"; there should be
+        # a corresponding default_whatever_fn method
         for name, val in self.__class__.__dict__.items():
             if name.endswith('_fn') and isinstance(val, InstrumentedAttribute):
-                print 'populating', name
                 # call the method
+                if not hasattr(self, 'default_' + name):
+                    raise ValueError()
                 default = getattr(self, 'default_' + name)()
                 # set the field
                 setattr(self, name, default)
