@@ -9,7 +9,7 @@ from sqlalchemy import (Column, Integer, String, DateTime,
 Base = declarative_base()
 STRING_LEN = 500
 
-from Project import Project
+import Project
 import msmbuilder.Trajectory
 
 class ASCII(types.TypeDecorator):
