@@ -112,10 +112,12 @@ class Project(object):
         if Session.query(models.Forcefield).count() == 0:
             # add forcefields
             for ff in p:
-                obj = models.Forcefield(name=ff['name'], water=ff['water'],
-                    driver=os.path.join(self.params_dir, ff['driver']),
-                    output_extension=ff['output_extension'],
-                    threads=ff['threads'], cost=ff['cost'])
+                # obj = models.Forcefield(name=ff['name'], water=ff['water'],
+                #     driver=os.path.join(self.params_dir, ff['driver']),
+                #     output_extension=ff['output_extension'],
+                #     threads=ff['threads'], cost=ff['cost'],
+                #     true_kinetics=ff['true_kinetics'])
+                obj = models.Forcefield(**ff)
                     
                 Session.add(obj)
 

@@ -5,7 +5,8 @@ from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import types
 from sqlalchemy import (Column, Integer, String, DateTime,
-                        Float, ForeignKey, Table, PickleType)
+                        Float, ForeignKey, Table, PickleType,
+                        Boolean)
 Base = declarative_base()
 STRING_LEN = 500
 
@@ -37,6 +38,7 @@ class Forcefield(Base):
     threads = Column(Integer)
     cost = Column(Float)
     output_extension = Column(ASCII)
+    true_kinetics = Column(Boolean)
         
     def __repr__(self):
         return "<Forcefield(name={}, water={}, driver={})>".format(self.name,

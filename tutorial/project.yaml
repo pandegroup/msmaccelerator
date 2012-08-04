@@ -5,12 +5,14 @@ forcefields:
     output_extension: .xtc
     threads: 8
     cost: 1
+    true_kinetics: False
   - name: amber99sb-ildn
     water: tip3p
     driver: test_driver.py
     threads: 8
     output_extension: .xtc
     cost: 1
+    true_kinetics : True
 
 # if you supply a starting_confs_lh5, then the initial jobs will be generated
 # by randomly selecting conformations from that trajectory. Otherwise, all
