@@ -47,10 +47,10 @@ def myfavorite(Session, msmgroup):
     for msm in msmgroup.markov_models:
         if msm.forcefield.true_kinetics:
             msm.model_selection_weight = p_exploit
-            even(Session, msm)
+            even_sampling(Session, msm)
         else:
             msm.model_selection_weight = 1-p_exploit
-            even(Session, msm)
+            even_sampling(Session, msm)
     
 
 def default(Session, msmgroup):
