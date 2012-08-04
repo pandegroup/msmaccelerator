@@ -104,7 +104,7 @@ class Project(object):
     def __connect_to_db(self):       
         db_path =  os.path.join(self.project_dir, 'db.sqlite')
         engine = create_engine('sqlite:///{}'.format(db_path), echo=False)
-        Session.configure(bind=engine, autocommit=True, autoflush=True)
+        Session.configure(bind=engine, autocommit=True)
         models.Base.metadata.create_all(engine) 
         
         
