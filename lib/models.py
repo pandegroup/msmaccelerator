@@ -60,7 +60,7 @@ class Trajectory(Base):
     
     
     def __basefn(self):
-        return '{base}/{ff}/'.format(base=Project.instance.project_dir, ff=self.forcefield.name)
+        return '{base}/{ff}/'.format(base=msmaccelerator.Project.instance.project_dir, ff=self.forcefield.name)
     def default_init_pdb_fn(self):
        return self.__basefn() + 'Inits/{id}.pdb'.format(id=self.id)
     def default_wqlog_fn(self):
