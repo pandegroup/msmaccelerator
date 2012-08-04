@@ -98,7 +98,7 @@ class Builder(object):
         msmgroup.populate_default_filenames()
         
         msmgroup.n_states = len(generators)
-        save_file(msmgroup.generators_fn, generators)
+        #save_file(msmgroup.generators_fn, generators)
 
         
         for msm in msmgroup.markov_models:
