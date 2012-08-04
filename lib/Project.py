@@ -118,6 +118,7 @@ class Project(object):
                 #     threads=ff['threads'], cost=ff['cost'],
                 #     true_kinetics=ff['true_kinetics'])
                 obj = models.Forcefield(**ff)
+                obj.driver = os.path.join(self.params_dir, ff['driver'])
                     
                 Session.add(obj)
 
