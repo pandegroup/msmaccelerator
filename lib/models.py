@@ -22,7 +22,7 @@ class _PopulateMixin(object):
         
         import IPython as ip;
         ip.embed()
-        for name, val in self.__dict__.items():
+        for name, val in self.__class__.__dict__.items():
             if name.endswith('_fn') and isinstance(val, InstrumentedAttribute):
                 print 'populating', name
                 # call the method
