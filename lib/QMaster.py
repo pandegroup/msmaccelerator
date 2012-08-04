@@ -200,7 +200,7 @@ class QMaster(threading.Thread):
         
         # need to do a commit from this the qmaster, since this is a different
         # session
-        #Session.commit()
+        Session.commit()
         self.wq.submit(task)    
         logger.info('Submitted to queue: %s', traj)
         
@@ -224,5 +224,5 @@ class QMaster(threading.Thread):
         traj.host = task.host
         traj.returned_time = datetime.now()
         traj.length = len(coordinates)
-        #Session.commit()
+        Session.commit()
         logger.info('Finished converting new traj to lh5 sucessfully')

@@ -135,7 +135,7 @@ class Builder(object):
         #=======================================================================#
 
         
-        #Session.commit()       
+        Session.commit()       
         logger.info("Round completed sucessfully")
         return True
         
