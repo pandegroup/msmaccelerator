@@ -40,31 +40,14 @@ class Builder(object):
         truth : boolean
             True if there is sufficient new data for a new round
         """
-        
-        # get most recent set of MSMs built
-        # msmgroup = Session.query(MSMGroup).order_by(MSMGroup.id.desc()).first()
-        # if msmgroup is None:
-        #     n_built = 0
-        # else:        
-        #     # the number of unique trajectories that are part of this msmgroup
-        #     # by constructing a query for the union of trajectories in any of the msms
-        #     # in the msm group
-        #     clauses = []
-        #     for msm in msmgroup.markov_models:
-        #         clauses.append(Trajectory.markov_models.contains(msm))
-        #     
-        #     q = Session.query(Trajectory).filter(and_(or_(*clauses),
-        #         Trajectory.returned_time != None))
-        #     
-        #     n_built = q.distinct().count()
-        # 
-        # # number of trajs in the database
-        # n_total = Session.query(Trajectory).filter(Trajectory.returned_time != None).count()
+
         qg = Session.query(MSMGroup)
         msmgroup = qg.order_by(MSMGroup.id.desc()).first()
-        
-        qt = Session.query(Trajectory)
-        n_built = qt.filter(Trajectory.msm_groups.contains(msmgroup)).count()
+        if msmgroup is not None:
+            qt = Session.query(Trajectory)
+            n_built = qt.filter(Trajectory.msm_groups.contains(msmgroup)).count()
+        else:
+            n_built = 0
         
         n_total = qt.filter(Trajectory.returned_time != None).count()
         
