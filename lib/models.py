@@ -20,8 +20,7 @@ class _PopulateMixin(object):
             raise Exception(('self.id is None!. Did you forget to commit before '
                 'calling this method?'))
         
-        import IPython as ip;
-        ip.embed()
+        # look for Columns that end with "_fn"
         for name, val in self.__class__.__dict__.items():
             if name.endswith('_fn') and isinstance(val, InstrumentedAttribute):
                 print 'populating', name
