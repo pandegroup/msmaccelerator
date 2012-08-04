@@ -33,6 +33,7 @@ def multinomial(weights):
     index : int
         The index of the selected item
     """
+    import IPython as ip; ip.embed()
     return np.where(np.random.multinomial(n=1, pvals=weights / np.sum(weights)))[0][0]
 
 
