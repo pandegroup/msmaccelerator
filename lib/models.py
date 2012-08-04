@@ -19,10 +19,6 @@ class _PopulateMixin(object):
         if self.id is None:
             raise Exception(('self.id is None!. Did you forget to commit before '
                 'calling this method?'))
-        if self.forcefield is None:
-            raise Exception()
-        if self.msm_group_id is None:
-            raise Exception()
         
         for name, val in self.__dict__.items():
             if name.endswith('_fn') and isinstance(val, InstrumentedAttribute):
