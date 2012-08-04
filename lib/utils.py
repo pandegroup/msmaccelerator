@@ -8,6 +8,7 @@ import msmbuilder.Trajectory
 import msmbuilder.Serializer
 import scipy.io
 import cPickle as pickle
+import sys, os
 
 def load_file(path):
     """Load a file
