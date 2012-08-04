@@ -120,10 +120,10 @@ class Builder(object):
         # The obligation of the adaptive_sampling routine is to set the
         # model_selection_weight on each MSM/forcefield and the microstate
         # selection weights
-        self.project.adaptive_sampling(Session, msmgroup)
-        
         # check to make sure that the right fields were populated
         try:
+            self.project.adaptive_sampling(Session, msmgroup)
+            
             for msm in msmgroup.markov_models:
                 if not isinstance(msm.model_selection_weight, numbers.Number):
                     raise ValueError('model selection weight on %s not set correctly' % msm)
