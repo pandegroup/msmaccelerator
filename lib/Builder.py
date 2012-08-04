@@ -4,6 +4,7 @@ import numpy as np
 import logging
 import cPickle as pickle
 import scipy.io
+import numbers
 from collections import defaultdict
 
 # msmbuilder imports
@@ -124,11 +125,11 @@ class Builder(object):
         # check to make sure that the right fields were populated
         try:
             for msm in msmgroup.markov_models:
-                if not isinstance(msm.model_selection_weight, float):
+                if not isinstance(msm.model_selection_weight, numbers.Number):
                     raise ValueError('model selection weight on %s not set correctly' % msm)
                 if not isinstance(msm.microstate_selection_weights, np.ndarray):
                     raise ValueError('microstate_selection_weights on %s not set correctly' % msm)
-        except ValueError:
+        except:
             logger.error('ERROR in adaptive sampling. Cleaning up db...')
             for msm in msmgroup.markov_models:
                 os.unlink(msm.counts_fn)

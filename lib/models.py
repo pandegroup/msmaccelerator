@@ -10,7 +10,6 @@ Base = declarative_base()
 STRING_LEN = 500
 
 import msmbuilder.Trajectory
-from msmaccelerator.Project import Project
 
 class ASCII(types.TypeDecorator):
     impl = types.String
@@ -239,4 +238,5 @@ class MSMGroup(Base):
 
     def __repr__(self):
         return "<BuildRound(id={})>".format(self.id)
-        
+
+from msmaccelerator import Project
