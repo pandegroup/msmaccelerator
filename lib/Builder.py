@@ -196,7 +196,7 @@ class Builder(object):
             def LoadTraj(self, trj_index):
                 if trj_index < 0 or trj_index > len(trajs):
                     raise IndexError('Sorry')
-                return msmbuilder.Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
+                return Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
         
         
         logger.info('Assigning...')
