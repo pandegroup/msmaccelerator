@@ -162,7 +162,7 @@ class MarkovModel(Base):
     # that two MarkovModels with the same forcefied in the same round get created
     # and then they would otherwise be given the same filenames
     def __basefn(self):
-        return '{base}/models/{ff}/{round}/'.format(base=Project.instance.project_dir,
+        return '{base}/models/{ff}/{round}/'.format(base=msmaccelerator.Project.instance.project_dir,
             ff=self.forcefield.name, round=self.msm_group_id)
     def default_counts_fn(self):
         return self.__basefn() + 'tCounts.{id}.mtx'.format(id=self.id)
