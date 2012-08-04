@@ -24,24 +24,21 @@ def myfavorite(Session, msmgroup):
     if n_new < 0:
         return default(Session, msmgroup)
     
-    # all trajectories in current model
-    clause = lambda msm: Trajectory.markov_models.contains(msm)
-    t_cur = and_(*[clause(msm) for msm in msmgroup.markov_models])
-    # all trajectories in prev model
-    t_prev = and_(*[clause(msm) for msm in prev.markov_models])
-    
     q = Session.query(Trajectory)
-    new_trajectories = q.filter(t_cur).filter(not_(t_prev))
-    
+    new_trajectories = q.filter(Trajectory.msm_groups.contains(msmgroup)).filter(not_(
+            Trajectory.msm_groups.contains(prev)))
+
     # sum of the number of steps in the new trajectories
-    n_steps = Session.query(func.sum(Trajectory.length)).filter(new_trajectories)
-    ip.embed()
+    sum_op = Session.query(func.sum(Trajectory.length))
+    sum_op = sum_op.filter(Trajectory.msm_groups.contains(msmgroup))
+    sum_op = sum_op.filter(not_(Trajectory.msm_groups.contains(prev)))
+    n_steps = float(sum_op.scalar())
     p_explore = activation_response(n_new / n_steps, k_factor)
 
     if len(msmgroup.markov_models) != 2:
-        raise ValueError()
+        raise ValueError('Only 2 models')
     if not [False, True] == sorted([msm.forcefield.true_kinetics for msm in msmgroup.markov_models]):
-        raise ValueError()
+        raise ValueError('one needs to be true_kinetics, the other not')
     
     for msm in msmgroup.markov_models:
         if msm.forcefield.true_kinetics:
@@ -50,6 +47,8 @@ def myfavorite(Session, msmgroup):
         else:
             msm.model_selection_weight = p_explore
             even_sampling(Session, msm)
+        
+        logger.info("%s selection weight: %f", msm.forcefield.name, msm.model_selection_weight)
     
 
 def default(Session, msmgroup):

@@ -169,6 +169,9 @@ class QMaster(threading.Thread):
         remote_pdb_fn = 'input.pdb'
         remote_output_fn = 'production_dry{}'.format(traj.forcefield.output_extension)
         
+        if traj.mode is None or traj.forcefield is None:
+            raise ValueError('malformed traj')
+
         task = Task('python ./{driver} {pdb_fn} {ff} {water} {mode} {threads}'.format(
             pdb_fn=remote_pdb_fn,
             mode=traj.mode,

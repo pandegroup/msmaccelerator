@@ -9,17 +9,20 @@ import shutil
 from msmaccelerator import Project
 from msmaccelerator.database import Session
 from msmaccelerator.models import Trajectory, MSMGroup, Forcefield, MarkovModel
+from msmaccelerator.utils import load_file, save_file
 
 S = Session
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-project_file', help='path to project.yaml')
+    parser.add_argument('-project_file', help='path to project.yaml', required=True)
     subparsers = parser.add_subparsers(dest="subparser_name")
-    shell_parser = subparsers.add_parser('shell')
-    performance_parser = subparsers.add_parser('performance')
-    performance_parser = subparsers.add_parser('check_sufficient')
-    performance_parser = subparsers.add_parser('drop_project')
+    subparsers.add_parser('shell')
+    subparsers.add_parser('performance')
+    subparsers.add_parser('check_sufficient')
+    subparsers.add_parser('drop_project')
+    subparsers.add_parser('cleanup')
+
 
     args = parser.parse_args()
 
