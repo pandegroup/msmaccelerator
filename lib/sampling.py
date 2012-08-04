@@ -14,7 +14,13 @@ def myfavorite(Session, msmgroup):
            
     prev = Session.query(MSMGroup).get(msmgroup.id - 1)
     if prev is None:
-        raise NotImplementedError
+        for msm in msmgroup.markov_models:
+            if msm.forcefield.true_kinetics:
+                msm.model_selection_weight = 0
+            else:
+                msm.model_selection_weight = 1
+            even_sampling(Session, msm)
+        
         
     # number of new states discovered
     n_new = msmgroup.n_states - prev.n_states
@@ -51,12 +57,16 @@ def default(Session, msmgroup):
     for msm in msmgroup.markov_models:
         msm.microstate_selection_weights = np.ones(msmgroup.n_states)
         msm.model_selection_weight = 1
-        msm.model_selection_weight
-    
 
-def even(Session, msm):
+
+#==============================================================================#
+
+def even_sampling(Session, msm):
     msm.microstate_selection_weights = np.ones(msm.msm_group.n_states)
-#======
+
+
+    #==============================================================================#
+
 def activation_response(x, k):
     """Curve from [0,1] -> [0,1]
     
