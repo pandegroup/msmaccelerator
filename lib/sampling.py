@@ -1,8 +1,12 @@
 from __future__ import division
 import numpy as np
 import logging
+import IPython as ip
 from msmaccelerator.models import Trajectory, Forcefield, MarkovModel, MSMGroup
-from sqlalchemy.sql import and_, or_
+from sqlalchemy.sql import and_, or_, not_
+from sqlalchemy import func
+
+
 logger = logging.getLogger('MSMAccelerator.sampling')
 
 def myfavorite(Session, msmgroup):
@@ -27,12 +31,12 @@ def myfavorite(Session, msmgroup):
     t_prev = and_(*[clause(msm) for msm in prev.markov_models])
     
     q = Session.query(Trajectory)
-    new_trajectories = q.filter(t_cur).except_(q.filter(t_prev))
+    new_trajectories = q.filter(t_cur).filter(not_(t_prev))
     
     # sum of the number of steps in the new trajectories
-    steps = sum(t.length - 1 for t in new_trajectories.values(Trajectory.length))
-    
-    p_explore = activation_response(n_new / steps, k_factor)
+    n_steps = Session.query(func.sum(Trajectory.length)).filter(new_trajectories)
+    ip.embed()
+    p_explore = activation_response(n_new / n_steps, k_factor)
 
     if len(msmgroup.markov_models) != 2:
         raise ValueError()

@@ -15,6 +15,7 @@ from msmbuilder.assigning import assign_in_memory
 from sqlalchemy.sql import and_, or_
 from models import Trajectory, Forcefield, MarkovModel, MSMGroup
 from database import Session
+import sampling
 from utils import load_file, save_file
 
 logger = logging.getLogger('MSMAccelerator.Builder')
@@ -117,20 +118,15 @@ class Builder(object):
         # check to make sure that the right fields were populated
         try:
             self.project.adaptive_sampling(Session, msmgroup)
-            
+        
             for msm in msmgroup.markov_models:
                 if not isinstance(msm.model_selection_weight, numbers.Number):
                     raise ValueError('model selection weight on %s not set correctly' % msm)
                 if not isinstance(msm.microstate_selection_weights, np.ndarray):
                     raise ValueError('microstate_selection_weights on %s not set correctly' % msm)
         except:
-            logger.error('ERROR in adaptive sampling. Cleaning up db...')
-            for msm in msmgroup.markov_models:
-                os.unlink(msm.counts_fn)
-                os.unlink(msm.assignments_fn)
-                os.unlink(msm.distances_fn)
-                os.unlink(msm.inverse_assignments_fn)
-            raise
+            logging.error('ADAPTIVE SAMPLING ERROR')
+            sampling.default(Session, msmgroup)
         
         #=======================================================================#
 
@@ -196,7 +192,7 @@ class Builder(object):
             def LoadTraj(self, trj_index):
                 if trj_index < 0 or trj_index > len(trajs):
                     raise IndexError('Sorry')
-                return Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
+                return msmbuilder.Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
         
         
         logger.info('Assigning...')
