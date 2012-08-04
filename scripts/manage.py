@@ -13,22 +13,23 @@ S = Session
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-project_file', help='path to project.yaml')
     subparsers = parser.add_subparsers(dest="subparser_name")
     shell_parser = subparsers.add_parser('shell')
     performance_parser = subparsers.add_parser('performance')
-
-    for p in [shell_parser, performance_parser]:
-        p.add_argument('-project_file', help='path to project.yaml')
+    performance_parser = subparsers.add_parser('check_sufficient')
 
     args = parser.parse_args()
 
-    if args.subparser_name == 'shell':
-        shell(args.project_file)
-    elif args.subparser_name == 'performance':
-        performance(args.project_file)
+    project = Project(args.project_file)
+    g = globals()
+    if not args.subparser_name in g:
+        raise NotImplementedError
+    g[args.subparser_name](project)
+        
     
     
-def shell(project_file):
+def shell(project):
     print "\033[95m>> from msmaccelerator.database import Session"
     print ">> from msmaccelerator.models import (Trajectory, MSMGroup,"
     print ">>                                    Forcefield, MarkovModel)"
@@ -37,15 +38,18 @@ def shell(project_file):
     print "\033[0m"
     print "\n"*2
     
-    p = Project(project_file)
+    P = project
     from IPython.frontend.terminal.embed import InteractiveShellEmbed
     ipshell = InteractiveShellEmbed(banner1='')
     
     ipshell()
     
-def performance(project_file):
-    p = Project(project_file)
+def check_sufficient(project):
+    from msmaccelerator import Builder
+    b = Builder(project)
+    b.is_sufficient_new_data()
     
+def performance(project_file):
     trajs = S.query(Trajectory).all()
     
     
