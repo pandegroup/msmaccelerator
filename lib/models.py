@@ -3,6 +3,7 @@ import os
 import numpy as np
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy import types
 from sqlalchemy import (Column, Integer, String, DateTime,
                         Float, ForeignKey, Table, PickleType,
@@ -12,6 +13,30 @@ STRING_LEN = 500
 
 import msmaccelerator.Project
 import msmbuilder.Trajectory
+
+class _PopulateMixin(object):
+    def populate_default_filenames(self):
+        if self.id is None:
+            raise Exception(('self.id is None!. Did you forget to commit before '
+                'calling this method?'))
+        if self.forcefield is None:
+            raise Exception()
+        if self.msm_group_id is None:
+            raise Exception()
+        
+        for name, val in self.__dict__.items():
+            if name.endswith('_fn') and isinstance(val, InstrumentedAttribute):
+                # call the method
+                default = getattr(self, 'default_' + name)()
+                # set the field
+                setattr(self, name, default)
+                
+                #just to be safe, lets make the directories if they dont exist
+                try:
+                    os.makedirs(os.path.split(default)[0])
+                except OSError:
+                    pass
+    
 
 class ASCII(types.TypeDecorator):
     impl = types.String
@@ -24,7 +49,7 @@ class ASCII(types.TypeDecorator):
             return str(value)
         return value
 
-class Forcefield(Base):
+class Forcefield(Base, _PopulateMixin):
     """
     database model describing a forcefield and how to run simulations using
     it (driver, threads, etc)
@@ -44,7 +69,7 @@ class Forcefield(Base):
         return "<Forcefield(name={}, water={}, driver={})>".format(self.name,
             self.water, self.driver)
 
-class Trajectory(Base):
+class Trajectory(Base, _PopulateMixin):
     """
     database model describing a trajectory
     """
@@ -76,27 +101,6 @@ class Trajectory(Base):
     def default_last_wet_snapshot_fn(self):
         return self.__basefn() + 'LastWetSnapshots/{id}.pdb'.format(id=self.id)
 
-    def populate_default_filenames(self):
-        if self.id is None:
-            raise Exception(('self.id is None!. Did you forget to commit before '
-                'calling this method?'))
-                
-        for name in ['init_pdb_fn', 'wqlog_fn', 'dry_xtc_fn', 'wet_xtc_fn',
-            'lh5_fn', 'last_wet_snapshot_fn']:
-            if getattr(self, name) is None:
-                # call the method
-                default = getattr(self, 'default_' + name)()
-                # set the field
-                setattr(self, name, default)
-                
-                #just to be safe, lets make the directories if they dont exist
-                try:
-                    os.makedirs(os.path.split(default)[0])
-                except OSError:
-                    pass
-                
-                
-        
     host = Column(ASCII)
     mode = Column(ASCII)
     name = Column(ASCII)
@@ -145,7 +149,7 @@ class Trajectory(Base):
 
 
 
-class MarkovModel(Base):
+class MarkovModel(Base, _PopulateMixin):
     """
     database model describing an MSM built from a set of trajectories, all in the
     same forcefield
@@ -175,31 +179,6 @@ class MarkovModel(Base):
     def default_inverse_assignments_fn(self):
         return self.__basefn() + 'InvAssignmnets.{id}.pickl'.format(id=self.id)
     
-    def populate_default_filenames(self):
-        if self.id is None:
-            raise Exception(('self.id is None!. Did you forget to commit before '
-                'calling this method?'))
-        if self.forcefield is None:
-            raise Exception()
-        if self.msm_group_id is None:
-            raise Exception()
-                
-        for name in ['counts_fn', 'assignments_fn', 'inverse_assignments_fn',
-            'distances_fn']:
-            if getattr(self, name) is None:
-                # call the method
-                default = getattr(self, 'default_' + name)()
-                # set the field
-                setattr(self, name, default)
-                
-                #just to be safe, lets make the directories if they dont exist
-                try:
-                    os.makedirs(os.path.split(default)[0])
-                except OSError:
-                    pass
-    
-    
-    
     forcefield_id = Column(Integer, ForeignKey('forcefields.id'))
     forcefield = relationship("Forcefield", backref=backref('markov_models',
         order_by=id))
@@ -227,7 +206,7 @@ class MarkovModel(Base):
 
 
 
-class MSMGroup(Base):
+class MSMGroup(Base, _PopulateMixin):
     """
     database model describing a set of MarkovModels built during concurrently
     that share a joint clustering
@@ -237,6 +216,16 @@ class MSMGroup(Base):
     id = Column(Integer, primary_key=True)
     generators_fn = Column(ASCII)
     n_states = Column(Integer)
+    
+    def __basefn(self):
+        return '{base}/models/gens/'.format(base=msmaccelerator.Project.instance.project_dir)
+    def default_generators_fn(self):
+        return self.__basefn() + 'Gens.{id}.lh5'.format(id=self.id)
+    
+    trajectories = relationship("Trajectory",  backref='msm_groups',
+        secondary=Table('msm_group_trajectories', Base.metadata,
+                Column('markov_model_id', Integer, ForeignKey('msm_groups.id')),
+                Column('trajectory_id', Integer, ForeignKey('trajectories.id'))))
     
 
     def __repr__(self):

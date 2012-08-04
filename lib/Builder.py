@@ -1,9 +1,6 @@
 import sys, os
-import re
 import numpy as np
 import logging
-import cPickle as pickle
-import scipy.io
 import numbers
 from collections import defaultdict
 
@@ -13,12 +10,13 @@ from msmbuilder.MSMLib import EstimateReversibleCountMatrix
 from msmbuilder.MSMLib import ErgodicTrim, ApplyMappingToAssignments
 from msmbuilder import clustering, metrics
 import msmbuilder.Trajectory
-import msmbuilder.Serializer
 from msmbuilder.assigning import assign_in_memory
 
 from sqlalchemy.sql import and_, or_
 from models import Trajectory, Forcefield, MarkovModel, MSMGroup
 from database import Session
+from utils import load_file, save_file
+
 logger = logging.getLogger('MSMAccelerator.Builder')
 
 class Builder(object):
@@ -44,24 +42,31 @@ class Builder(object):
         """
         
         # get most recent set of MSMs built
-        msmgroup = Session.query(MSMGroup).order_by(MSMGroup.id.desc()).first()
-        if msmgroup is None:
-            n_built = 0
-        else:        
-            # the number of unique trajectories that are part of this msmgroup
-            # by constructing a query for the union of trajectories in any of the msms
-            # in the msm group
-            clauses = []
-            for msm in msmgroup.markov_models:
-                clauses.append(Trajectory.markov_models.contains(msm))
-            
-            q = Session.query(Trajectory).filter(and_(or_(*clauses),
-                Trajectory.returned_time != None))
-            
-            n_built = q.distinct().count()
+        # msmgroup = Session.query(MSMGroup).order_by(MSMGroup.id.desc()).first()
+        # if msmgroup is None:
+        #     n_built = 0
+        # else:        
+        #     # the number of unique trajectories that are part of this msmgroup
+        #     # by constructing a query for the union of trajectories in any of the msms
+        #     # in the msm group
+        #     clauses = []
+        #     for msm in msmgroup.markov_models:
+        #         clauses.append(Trajectory.markov_models.contains(msm))
+        #     
+        #     q = Session.query(Trajectory).filter(and_(or_(*clauses),
+        #         Trajectory.returned_time != None))
+        #     
+        #     n_built = q.distinct().count()
+        # 
+        # # number of trajs in the database
+        # n_total = Session.query(Trajectory).filter(Trajectory.returned_time != None).count()
+        q = Session.query(MSMGroup)
+        msmgroup = q.order_by(MSMGroup.id.desc()).first()
         
-        # number of trajs in the database
-        n_total = Session.query(Trajectory).filter(Trajectory.returned_time != None).count()
+        q = Session.query(Trajectories)
+        n_built = q.filter(Trajectory.msm_groups.contains(msmgroup)).count()
+        
+        n_total = q.filter(Trajectory.returned_time != None).count()
         
         truth = n_total >= n_built + self.project.num_trajs_sufficient_for_round
         
@@ -95,26 +100,32 @@ class Builder(object):
             logger.info("Skipping check for adequate data.")
         
         # use all the data together to get the cluster centers
-        generators = self.joint_clustering()
+        generators, db_trajs = self.joint_clustering()
         
-        msmgroup = MSMGroup()
+        msmgroup = MSMGroup(trajectories=db_trajs)
         for ff in Session.query(Forcefield).all():
-            msm = self.build_msm(ff, generators=generators)
+            trajs = filter(lambda t: t.forcefield == ff, db_trajs)
+            msm = self.build_msm(ff, generators=generators, trajs=trajs)
             if msm is not None:
                 msmgroup.markov_models.append(msm)
+        
+        # add generators to msmgroup
         Session.add(msmgroup)
         Session.flush()
+        msmgroup.populate_default_filenames()
+        
+        msmgroup.n_states = len(generators)
+        save_file(msmgroup.generators_fn, generators)
+
         
         for msm in msmgroup.markov_models:
             msm.populate_default_filenames()
-            scipy.io.mmwrite(msm.counts_fn, msm.counts)
-            msmbuilder.Serializer.SaveData(msm.assignments_fn, msm.assignments)
-            msmbuilder.Serializer.SaveData(msm.distances_fn, msm.distances)
-            pickle.dump(invert_assignments(msm.assignments), open(msm.inverse_assignments_fn, 'w'))
-            
+            save_file(msm.counts_fn, msm.counts)
+            save_file(msm.assignments_fn, msm.assignments)
+            save_file(msm.distances_fn, msm.distances)
+            save_file(msm.inverse_assignments_fn, invert_assignments(msm.assignments))
         
-        msmgroup.n_states = len(generators)
-        
+
         # ======================================================================#
         # HERE IS WHERE THE ADAPTIVE SAMPLING ALGORITHMS GET CALLED
         # The obligation of the adaptive_sampling routine is to set the
@@ -141,7 +152,7 @@ class Builder(object):
         #=======================================================================#
 
         
-        Session.commit()        
+        Session.flush()       
         logger.info("Round completed sucessfully")
         return True
         
@@ -165,10 +176,10 @@ class Builder(object):
         loaded_trjs = [load(t.lh5_fn)[::self.project.stride] for t in db_trajs]
         
         clusterer = self.project.clusterer(trajectories=loaded_trjs)
-        return clusterer.get_generators_as_traj()
+        return clusterer.get_generators_as_traj(), db_trajs
 
             
-    def build_msm(self, forcefield, generators):
+    def build_msm(self, forcefield, generators, trajs):
         """Build an MSM for this forcefield using the most recent trajectories
         in the database.
         
@@ -179,6 +190,7 @@ class Builder(object):
         forcefield : models.Forcefield
             database entry on the forcefield that we build for
         generators : msmbuilder.Trajectory
+        trajs : list of models.Trajectory
 
         Returns
         -------
@@ -188,7 +200,8 @@ class Builder(object):
         
         # I want to use assign_in_memory, which requires an msmbuilder.Project
         # so, lets spoof it
-        trajs = Session.query(Trajectory).filter(Trajectory.returned_time != None).all()
+        
+        
         if len(trajs) == 0:
             return None
         
@@ -200,7 +213,7 @@ class Builder(object):
             def LoadTraj(self, trj_index):
                 if trj_index < 0 or trj_index > len(trajs):
                     raise IndexError('Sorry')
-                return msmbuilder.Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
+                return Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
         
         
         logger.info('Assigning...')

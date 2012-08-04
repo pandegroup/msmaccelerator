@@ -4,6 +4,49 @@ from itertools import ifilterfalse
 from operator import itemgetter
 import logging
 import logging.handlers
+import msmbuilder.Trajectory
+import msmbuilder.Serializer
+import scipy.io
+import cPickle as pickle
+
+def load_file(path):
+    """Load a file
+    
+    .mtx, .h5, .lh5, .pdb, .pickle
+    """
+    ext = os.path.splitext(path)[1]
+    if ext == '.mtx':
+        return scipy.io.mmread(path)
+    elif ext == '.h5':
+        return msmbuilder.Serializer.LoadData(path)
+    elif ext in ['.lh5', '.pdb']:
+        return msmbuilder.Trajectory.LoadTrajectoryFile(path)
+    elif ext == '.pickl':
+        return pickle.load(open(path))
+    else:
+        raise NotImplementedError
+
+def save_file(path, value):
+    """Save a file
+    
+    .mtx, .h5, .lh5, .xtc, .pdb, .pickl
+    """
+    ext = os.path.splitext(path)[1]
+    if ext == '.mtx':
+        return scipy.io.mmwrite(path, value)
+    elif ext == '.h5':
+        return msmbuilder.Serializer.SaveData(path, value)
+    elif ext == '.lh5':
+        return value.SaveToLHDF(path)
+    elif ext == '.xtc':
+        return value.SaveToXTC(path)
+    elif ext == '.pdb':
+        return value.SaveToPDB(path)
+    elif ext == '.pickl':
+        return pickle.dump(value, open(path, 'w'))
+    else:
+        raise NotImplementedError
+
 
 #http://stackoverflow.com/questions/1363839/python-singleton-object-instantiation
 class Singleton(type):

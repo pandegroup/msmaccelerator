@@ -157,7 +157,7 @@ class QMaster(threading.Thread):
         if traj.submit_time is not None:
             raise ValueError("This traj has already been submitted")
         Session.add(traj)
-        Session.commit()
+        Session.flush()
         traj.populate_default_filenames()
         
         if not hasattr(traj, 'init_pdb'):
@@ -196,7 +196,7 @@ class QMaster(threading.Thread):
         task.specify_algorithm(WORK_QUEUE_SCHEDULE_FILES) # what does this do?
         
         traj.submit_time = datetime.now()
-        Session.commit()
+        Session.flush()
         self.wq.submit(task)    
         logger.info('Submitted to queue: %s', traj)
         
@@ -220,5 +220,5 @@ class QMaster(threading.Thread):
         traj.host = task.host
         traj.returned_time = datetime.now()
         traj.length = len(coordinates)
-        Session.commit()
+        Session.flush()
         logger.info('Finished converting new traj to lh5 sucessfully')

@@ -47,7 +47,9 @@ def shell(project):
 def check_sufficient(project):
     from msmaccelerator import Builder
     b = Builder(project)
+    print 'Running\n'
     b.is_sufficient_new_data()
+    print 'Done'
     
 def performance(project_file):
     trajs = S.query(Trajectory).all()
