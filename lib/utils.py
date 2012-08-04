@@ -17,7 +17,7 @@ def load_file(path):
     """
     path = str(path)
     
-    ext = os.path.splitext(path)[1]
+    ext = os.path.splitext(path)[1].lower()
     if ext == '.mtx':
         return scipy.io.mmread(path)
     elif ext == '.h5':
@@ -27,7 +27,7 @@ def load_file(path):
     elif ext == '.pickl':
         return pickle.load(open(path))
     else:
-        raise NotImplementedError(ext)
+        raise ValueError(ext)
 
 def save_file(path, value):
     """Save a file
@@ -35,7 +35,7 @@ def save_file(path, value):
     .mtx, .h5, .lh5, .xtc, .pdb, .pickl
     """
     path = str(path)
-    ext = os.path.splitext(path)[1]
+    ext = os.path.splitext(path)[1].lower()
     if ext == '.mtx':
         return scipy.io.mmwrite(path, value)
     elif ext == '.h5':
@@ -49,7 +49,7 @@ def save_file(path, value):
     elif ext == '.pickl':
         return pickle.dump(value, open(path, 'w'))
     else:
-        raise NotImplementedError(ext)
+        raise ValueError(ext)
 
 
 #http://stackoverflow.com/questions/1363839/python-singleton-object-instantiation
