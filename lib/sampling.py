@@ -9,7 +9,7 @@ def myfavorite(Session, msmgroup):
     logger.info('Running myfavorite')
     
     # =============#
-    k_factor = 0
+    k_factor = -100
     # =============#
            
     prev = Session.query(MSMGroup).get(msmgroup.id - 1)
@@ -37,7 +37,7 @@ def myfavorite(Session, msmgroup):
     # sum of the number of steps in the new trajectories
     steps = sum(t.length - 1 for t in new_trajectories.values(Trajectory.length))
     
-    p_exploit = activation_response(n_new / steps, k_factor)
+    p_explore = activation_response(n_new / steps, k_factor)
 
     if len(msmgroup.markov_models) != 2:
         raise ValueError()
@@ -46,10 +46,10 @@ def myfavorite(Session, msmgroup):
     
     for msm in msmgroup.markov_models:
         if msm.forcefield.true_kinetics:
-            msm.model_selection_weight = p_exploit
+            msm.model_selection_weight = 1-p_explore
             even_sampling(Session, msm)
         else:
-            msm.model_selection_weight = 1-p_exploit
+            msm.model_selection_weight = p_explore
             even_sampling(Session, msm)
     
 
