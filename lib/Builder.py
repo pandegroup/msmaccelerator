@@ -41,10 +41,10 @@ class Builder(object):
             True if there is sufficient new data for a new round
         """
 
-        qg = Session.query(MSMGroup)
+        qg, qt = Session.query(MSMGroup), Session.query(Trajectory)
+        
         msmgroup = qg.order_by(MSMGroup.id.desc()).first()
         if msmgroup is not None:
-            qt = Session.query(Trajectory)
             n_built = qt.filter(Trajectory.msm_groups.contains(msmgroup)).count()
         else:
             n_built = 0
