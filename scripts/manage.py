@@ -37,6 +37,7 @@ def shell(project_file):
     print "\033[0m"
     print "\n"*2
     
+    p = Project(project_file)
     from IPython.frontend.terminal.embed import InteractiveShellEmbed
     ipshell = InteractiveShellEmbed(banner1='')
     
