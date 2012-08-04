@@ -49,7 +49,7 @@ def save_file(path, value):
     elif ext == '.pickl':
         return pickle.dump(value, open(path, 'w'))
     else:
-        raise NotImplementedError
+        raise NotImplementedError(ext)
 
 
 #http://stackoverflow.com/questions/1363839/python-singleton-object-instantiation
