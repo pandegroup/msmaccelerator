@@ -15,6 +15,29 @@ import msmaccelerator.Project
 import msmbuilder.Trajectory
 
 class _PopulateMixin(object):
+    """Mixin superclass that adds the populate_default_filenames method.
+    
+    The idea here is to make it easier to store files in the database by only
+    storing the path to the filename on disk.
+    
+    models that inherit from _PopulateMixin should have string columns such as
+    lh5_fn or counts_fn (ending in "_fn"), and a corresponding method called
+    default_lh5_fn or default_counts_fn. When populate_default_filenames is
+    called, those filenames will be set by calling the default function.
+    
+    This gives you a little bit more flexibility than what you can accomplish using
+    SQLAlchemey defaults alone, because you choose when populate_default_filenames
+    is called.
+    
+    This enables you to set the defaults only *AFTER* the model has been flushed
+    into the database, assigning it an ID. This makes it possible for the default
+    value of one of the filenames to depend on the id or on some other relationship.
+
+    I know this is not a very elegant solution, but I'm not sure how to get a
+    truely transparent hybrid of in-database and on-disk storage with all of the
+    aspects like default filenames that depend on id or relationships...
+    """
+    
     def populate_default_filenames(self):
         if self.id is None:
             raise Exception(('self.id is None!. Did you forget to commit before '
@@ -39,6 +62,13 @@ class _PopulateMixin(object):
     
 
 class ASCII(types.TypeDecorator):
+    """
+    Honestly, I don't know if this actually works. Its supposed to be a
+    string database type that ensures that the values coming out of the db
+    are of type str (not of type unicode), but it doesn't seem to work.
+    
+    I haven't checked closely whats going on (RTM 8/6)
+    """
     impl = types.String
     
     def __init__(self):

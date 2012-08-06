@@ -40,12 +40,14 @@ def multinomial(weights):
 def generate_job():
     """Generate a single job from the most recent MSMs
     
-    Parameters
-    ----------
+    No parameters -- reads from the database and from the Project file to get
+    info.
     
     Returns
     -------
-    An unsaved models.Job db object
+    traj : models.Trajectory
+        An unsaved trajectory. Note that we "attach" the conformation that we want
+        to start from to the object as traj.init_pdb.
     """
     
     # get the most recent build round
@@ -120,16 +122,13 @@ def generate_job():
 def _generate_equilibration_job():
     """Generate a single equilibration job from the first forcefield
     
-    Parameters
-    ----------
-    tmp_dir : str
-        Location to save PDBs that will be used as initial structures for
-        the job
+    No parameters -- reads from the database and from the Project file to get info.
     
     Returns
     -------
-    trajectory : models.Trajectory
-    
+    traj : models.Trajectory
+        An unsaved trajectory. Note that we "attach" the conformation that we want
+        to start from to the object as traj.init_pdb.
     """
         
     logger.info('Constructing initial equilibration job')

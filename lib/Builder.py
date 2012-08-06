@@ -22,6 +22,7 @@ from utils import load_file, save_file
 logger = logging.getLogger('MSMAccelerator.Builder')
 
 def n_rounds():
+    "Number of groups of MSMs that have been built"
     return Session.query(MSMGroup).count()
         
 def is_sufficient_new_data():
@@ -206,11 +207,25 @@ def build_msm(forcefield, generators, trajs):
         
         
 def construct_counts_matrix(assignments):
-    """Build and return a counts matrix from assignments. Symmetrize either
-    with transpose or MLE based on the value of the self.symmetrize variable
+    """Build and return a counts matrix from assignments.
+    
+    Symmetrize either with transpose or MLE based on the value of the
+    self.symmetrize variable
         
     Also modifies the assignments file that you pass it to reflect ergodic
-    trimming"""
+    trimming
+    
+    Parameters
+    ----------
+    assignments : np.ndarray
+        2D array of MSMBuilder assignments
+    
+    Returns
+    -------
+    counts : scipy.sparse.csr_matrix
+        transition counts
+    
+    """
         
     n_states  = np.max(assignments.flatten()) + 1
     raw_counts = GetCountMatrixFromAssignments(assignments, n_states,
@@ -249,6 +264,23 @@ def construct_counts_matrix(assignments):
 # UTILITY FUNCTION
 # THIS SHOULD REALLY BE INSIDE MSMBUILDER
 def invert_assignments(assignments):
+    """Invert an assignments array -- that is, produce a mapping
+    from state -> traj/frame
+    
+    Parameters
+    ----------
+    assignments : np.ndarray
+        2D array of MSMBuilder assignments
+    
+    Returns
+    -------
+    inv_assignments : dict
+        Mapping from state -> traj,frame, such that inv_assignments[s]
+        gives the conformations assigned to state s.
+    
+    """
+    
+    
     inverse_assignments = defaultdict(lambda:  [])
     for i in xrange(assignments.shape[0]):
         for j in xrange(assignments.shape[1]):
