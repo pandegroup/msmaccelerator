@@ -35,6 +35,11 @@ is triggered and begins data analysis.
 The second major component is a MySQL database that stores (paths to) trajectories,
 models, and metadata associated with the running set of simulations. The various
 portions of MSMAccelerator largely stay in sync by coordinating via the database.
+Using MySQL is a bit of a pain compared to SQLite, but (I think) required. The
+key reason is that MSMAccelerator is a threaded application in which both threads
+need to make write operations, and SQLite has no support for this type of
+concurrency.
+
 
 There are three main modules. First is QMaster, which controls the WorkQueue 
 instance, adding jobs to the queue and retrieving them from the queue. The second
