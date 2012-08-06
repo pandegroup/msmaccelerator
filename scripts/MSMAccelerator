@@ -51,26 +51,24 @@ def main():
         logger.info('Starting up')
         project = Project(args.project_filename)
         qmaster = QMaster(project, args.port)
-        builder = Builder(project)
-        brain   = Brain(project)
         cause   = 'queue empty'
         
         # try building right at the begining if theres any new data
         # hanging out
-        builder.run_round(checkdata=True)
+        Builder.run_round(checkdata=True)
         
         logger.info('Currently on round %d. Going to round %d' \
-            % (builder.n_rounds, project.n_rounds))
+            % (Builder.n_rounds(), project.n_rounds))
 
-        while builder.n_rounds < project.n_rounds:
+        while Builder.n_rounds() < project.n_rounds:
             if cause == 'job returned':
-                builder.run_round(checkdata=True)
+                Builder.run_round(checkdata=True)
                 logger.info('Completed Round')
             
             if cause == 'queue empty':
-                logger.info('Generating new job for round {0}'.format(builder.n_rounds))
+                logger.info('Generating new job for round {0}'.format(Builder.n_rounds()))
                 # build from round_num - 1, since that is the last completed round
-                qmaster.submit(brain.generate_job())
+                qmaster.submit(Brain.generate_job())
             
             cause = qmaster.wait()
             logger.info('Wakeup Cause: {0}'.format(cause))

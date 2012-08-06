@@ -169,6 +169,9 @@ class QMaster(threading.Thread):
         remote_pdb_fn = 'input.pdb'
         remote_output_fn = 'production_dry{}'.format(traj.forcefield.output_extension)
         
+        if traj.mode is None or traj.forcefield is None:
+            raise ValueError('malformed traj')
+
         task = Task('python ./{driver} {pdb_fn} {ff} {water} {mode} {threads}'.format(
             pdb_fn=remote_pdb_fn,
             mode=traj.mode,
@@ -212,7 +215,7 @@ class QMaster(threading.Thread):
         
         try:
             # save lh5 version of the trajectory
-            conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
+            conf = load_file(self.project.pdb_topology_file)
             coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(str(traj.dry_xtc_fn), Conf=conf)
             save_file(traj.lh5_fn, coordinates)
         
@@ -221,8 +224,23 @@ class QMaster(threading.Thread):
             logger.exception(e)
             raise
         
+        # convert last_wet_snapshot to lh5
+        pdb_to_lh5(traj, 'last_wet_snapshot_fn')
+        pdb_to_lh5(traj, 'init_pdb_fn')
+
+
         traj.host = task.host
         traj.returned_time = datetime.now()
         traj.length = len(coordinates)
         Session.flush()
         logger.info('Finished converting new traj to lh5 sucessfully')
+
+
+def pdb_to_lh5(traj, field):
+    path = getattr(traj, field)
+    data = load_file(path)
+    new_fn = os.path.splitext(path)[0] + '.lh5'
+    save_file(new_fn, data)
+    os.unlink(path)
+    setattr(traj, field, new_fn)
+    

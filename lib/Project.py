@@ -8,6 +8,7 @@ import numpy as np
 from msmbuilder import metrics, clustering
 from msmbuilder.Trajectory import Trajectory
 from sqlalchemy import create_engine
+import sqlalchemy.exc
 
 import models
 import sampling
@@ -106,13 +107,26 @@ class Project(object):
             raise ValueError(self.symmetrize)
             
             
-    def __connect_to_db(self):       
+    def __connect_to_db(self):
         db_path = "mysql://{}:{}@{}/{}".format(self.mysql_user, self.mysql_password,
-            self.mysql_host, self.mysql_db)
-        engine = create_engine(db_path, echo=False)
-        Session.configure(bind=engine)
-        models.Base.metadata.create_all(engine) 
+                                               self.mysql_host, self.mysql_db)
+        db_path2 = "mysql://{}:{}@{}".format(self.mysql_user, self.mysql_password,
+                                             self.mysql_host)
+        def connect():
+            engine = create_engine(db_path, echo=False)
+            Session.configure(bind=engine)
+            models.Base.metadata.create_all(engine)
+        def create():
+            engine = create_engine(db_path2, echo=True)
+            connection = engine.connect()
+            connection.execute('CREATE DATABASE {};'.format(self.mysql_db))
+            connection.close()
         
+        try:
+            connect()
+        except sqlalchemy.exc.OperationalError:
+            create()
+            connect()
         
     def add_forcefields_to_db(self, p):
         if Session.query(models.Forcefield).count() == 0:

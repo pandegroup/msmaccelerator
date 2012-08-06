@@ -4,20 +4,25 @@ import numpy as np
 import argparse
 from msmbuilder import Serializer
 import msmbuilder.Trajectory
+import shutil
 
 from msmaccelerator import Project
 from msmaccelerator.database import Session
 from msmaccelerator.models import Trajectory, MSMGroup, Forcefield, MarkovModel
+from msmaccelerator.utils import load_file, save_file
 
 S = Session
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-project_file', help='path to project.yaml')
+    parser.add_argument('-project_file', help='path to project.yaml', required=True)
     subparsers = parser.add_subparsers(dest="subparser_name")
-    shell_parser = subparsers.add_parser('shell')
-    performance_parser = subparsers.add_parser('performance')
-    performance_parser = subparsers.add_parser('check_sufficient')
+    subparsers.add_parser('shell')
+    subparsers.add_parser('performance')
+    subparsers.add_parser('check_sufficient')
+    subparsers.add_parser('drop_project')
+    subparsers.add_parser('cleanup')
+
 
     args = parser.parse_args()
 
@@ -28,7 +33,19 @@ def main():
     g[args.subparser_name](project)
         
     
+def drop_project(project):
+    val = raw_input('Are you sure you want to delete the project (deleting data and db)? yes/[no] ')
+    if val != 'yes':
+        print 'Exiting.'
+        return
+
+    connection = S.connection()
+    connection.execute('DROP DATABASE {};'.format(project.mysql_db))
+    print 'Dropped database.'
+    shutil.rmtree(project.project_dir)
+    print 'Files deleted'
     
+
 def shell(project):
     print "\033[95m>> from msmaccelerator.database import Session"
     print ">> from msmaccelerator.models import (Trajectory, MSMGroup,"
