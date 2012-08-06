@@ -72,9 +72,9 @@ $ easy_install mysql-python
 On a fresh Ubuntu 11.10 instance, I used the following commands to get mysql setup
 (with python bindings)
 
-sudo apt-get install mysql
-sudo apt-get install libmysqlclient-dev
-easy_install mysql-python
+    sudo apt-get install mysql
+    sudo apt-get install libmysqlclient-dev
+    easy_install mysql-python
 
 If you're not using EPD python, the python packages that you'll need to install
 include, but may not be limited to
