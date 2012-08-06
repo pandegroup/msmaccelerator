@@ -41,9 +41,9 @@ need to make write operations, and SQLite has no support for this type of
 concurrency.
 
 
-There are three main modules. First is QMaster, which controls the WorkQueue 
+There are three main modules. First is `QMaster`, which controls the WorkQueue 
 instance, adding jobs to the queue and retrieving them from the queue. The second
-is Brain, which creates the jobs, and the third is Builder, which builds the
+is `Brain`, which creates the jobs, and the third is `Builder`, which builds the
 Markov state models.
 
 In addition to these components, there is a core `Project` class that loads the
