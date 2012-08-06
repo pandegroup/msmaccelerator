@@ -30,22 +30,22 @@ to make small modifications.
 Once all the necessary software is installed, it's time to boot up some
 workers! Submit a bunch of workers with the scripts
 
-  sge_submit_workers
-  pbs_submit_workers
-  pbs_submit_workers_tunnel (see notes below)
+    sge_submit_workers
+    pbs_submit_workers
+    pbs_submit_workers_tunnel (see notes below)
 
 each of which should be in your path. These scripts will each submit a
 specified number of jobs, each with a number of workers running a number
 of threads. E.G.
 
-  Usage: sge_submit_workers [options] <servername> <port> <num-workers>
-  $ ./pbs_submit_workers mycomputer 5521 12
+    Usage: sge_submit_workers [options] <servername> <port> <num-workers>
+    $ ./pbs_submit_workers mycomputer 5521 12
 
 submits 12 PBS jobs, each running X workers, each worker running X threads.
 
 That's pretty much it! Boot up a master and get crackin'!
 
-Notes on the script "pbs_submit_workers_tunnel":
+Notes on the script `pbs_submit_workers_tunnel`:
 This script is designed to work similarly to the others, but on clusters
 where compute nodes cannot connect to the internet (but the head node can).
 In this script, the worker jobs starts an ssh tunnel that routes communication
