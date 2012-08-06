@@ -33,6 +33,8 @@ def myfavorite(Session, msmgroup):
     sum_op = sum_op.filter(Trajectory.msm_groups.contains(msmgroup))
     sum_op = sum_op.filter(not_(Trajectory.msm_groups.contains(prev)))
     n_steps = float(sum_op.scalar())
+    
+    
     p_explore = activation_response(n_new / n_steps, k_factor)
 
     if len(msmgroup.markov_models) != 2:
