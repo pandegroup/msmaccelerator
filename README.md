@@ -48,7 +48,14 @@ Markov state models.
 
 In addition to these components, there is a core `Project` class that loads the
 configuration file (project.yaml) and initiates the database connection. The
-`sampling` module contains the adaptive sampling logic. 
+`sampling` module contains the adaptive sampling logic.
+
+MSMAccelerator abstracts out the difference between MD engines by using a set
+of python scripts called drivers. Each MD engine is associated with a driver
+that is responsible for taking a small number of command line options (PDB file,
+forcefield name, etc), and then setting up and running the simulation. Details
+like the temperature, type of thermostat, etc, should be set inside the driver
+file and are thus invisible to the rest of MSMAccelerator.
 
 Dependencies
 ------------
