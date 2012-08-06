@@ -1,6 +1,9 @@
 MSMAccelerator
 ==============
 
+Overview
+--------
+
 MSMAccelerator is an adaptive sampling engine for Markov state model powered
 molecular dynamics simulations.
 
