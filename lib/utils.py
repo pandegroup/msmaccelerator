@@ -1,9 +1,74 @@
+# This file is part of MSMAccelerator.
+#
+# Copyright 2011 Stanford University
+#
+# MSMAccelerator is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
 import functools
 import collections
 from itertools import ifilterfalse
 from operator import itemgetter
 import logging
 import logging.handlers
+import msmbuilder.Trajectory
+import msmbuilder.Serializer
+import scipy.io
+import cPickle as pickle
+import sys, os
+
+def load_file(path):
+    """Load a file
+    
+    .mtx, .h5, .lh5, .pdb, .pickle
+    """
+    path = str(path)
+    
+    ext = os.path.splitext(path)[1].lower()
+    if ext == '.mtx':
+        return scipy.io.mmread(path)
+    elif ext == '.h5':
+        return msmbuilder.Serializer.LoadData(path)
+    elif ext in ['.lh5', '.pdb']:
+        return msmbuilder.Trajectory.LoadTrajectoryFile(path)
+    elif ext == '.pickl':
+        return pickle.load(open(path))
+    else:
+        raise NotImplementedError(ext)
+
+def save_file(path, value):
+    """Save a file
+    
+    .mtx, .h5, .lh5, .xtc, .pdb, .pickl
+    """
+    path = str(path)
+    ext = os.path.splitext(path)[1].lower()
+    if ext == '.mtx':
+        return scipy.io.mmwrite(path, value)
+    elif ext == '.h5':
+        return msmbuilder.Serializer.SaveData(path, value)
+    elif ext == '.lh5':
+        return value.SaveToLHDF(path)
+    elif ext == '.xtc':
+        return value.SaveToXTC(path)
+    elif ext == '.pdb':
+        return value.SaveToPDB(path)
+    elif ext == '.pickl':
+        return pickle.dump(value, open(path, 'w'))
+    else:
+        raise NotImplementedError(ext)
+
 
 #http://stackoverflow.com/questions/1363839/python-singleton-object-instantiation
 class Singleton(type):

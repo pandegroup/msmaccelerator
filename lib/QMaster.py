@@ -1,3 +1,21 @@
+# This file is part of MSMAccelerator.
+#
+# Copyright 2011 Stanford University
+#
+# MSMAccelerator is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
 from work_queue import Task, WorkQueue, set_debug_flag
 from work_queue import WORK_QUEUE_SCHEDULE_FCFS
 from work_queue import WORK_QUEUE_SCHEDULE_FILES
@@ -11,6 +29,7 @@ from datetime import datetime
 import msmbuilder.Trajectory
 import models
 from database import Session
+from utils import save_file, load_file
 
 
 logger = logging.getLogger('MSMAccelerator.QMaster')
@@ -157,17 +176,20 @@ class QMaster(threading.Thread):
         if traj.submit_time is not None:
             raise ValueError("This traj has already been submitted")
         Session.add(traj)
-        Session.commit()
+        Session.flush()
         traj.populate_default_filenames()
         
         if not hasattr(traj, 'init_pdb'):
             raise ValueError('Traj is supposed to have a pdb object tacked on')            
-        traj.init_pdb.SaveToPDB(traj.init_pdb_fn)
+        save_file(traj.init_pdb_fn, traj.init_pdb)
         
         remote_driver_fn = os.path.split(str(traj.forcefield.driver))[1]
         remote_pdb_fn = 'input.pdb'
         remote_output_fn = 'production_dry{}'.format(traj.forcefield.output_extension)
         
+        if traj.mode is None or traj.forcefield is None:
+            raise ValueError('malformed traj')
+
         task = Task('python ./{driver} {pdb_fn} {ff} {water} {mode} {threads}'.format(
             pdb_fn=remote_pdb_fn,
             mode=traj.mode,
@@ -196,6 +218,9 @@ class QMaster(threading.Thread):
         task.specify_algorithm(WORK_QUEUE_SCHEDULE_FILES) # what does this do?
         
         traj.submit_time = datetime.now()
+        
+        # need to do a commit from this the qmaster, since this is a different
+        # session
         Session.commit()
         self.wq.submit(task)    
         logger.info('Submitted to queue: %s', traj)
@@ -208,17 +233,32 @@ class QMaster(threading.Thread):
         
         try:
             # save lh5 version of the trajectory
-            conf = msmbuilder.Trajectory.LoadTrajectoryFile(self.project.pdb_topology_file)
+            conf = load_file(self.project.pdb_topology_file)
             coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(str(traj.dry_xtc_fn), Conf=conf)
-            coordinates.SaveToLHDF(str(traj.lh5_fn))
+            save_file(traj.lh5_fn, coordinates)
         
         except Exception as e:
             logger.error('When postprocessing %s, convert to lh5 failed!', traj)
             logger.exception(e)
             raise
         
+        # convert last_wet_snapshot to lh5
+        pdb_to_lh5(traj, 'last_wet_snapshot_fn')
+        pdb_to_lh5(traj, 'init_pdb_fn')
+
+
         traj.host = task.host
         traj.returned_time = datetime.now()
         traj.length = len(coordinates)
-        Session.commit()
+        Session.flush()
         logger.info('Finished converting new traj to lh5 sucessfully')
+
+
+def pdb_to_lh5(traj, field):
+    path = getattr(traj, field)
+    data = load_file(path)
+    new_fn = os.path.splitext(path)[0] + '.lh5'
+    save_file(new_fn, data)
+    os.unlink(path)
+    setattr(traj, field, new_fn)
+    

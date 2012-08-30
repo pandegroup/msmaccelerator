@@ -1,3 +1,21 @@
+# This file is part of MSMAccelerator.
+#
+# Copyright 2011 Stanford University
+#
+# MSMAccelerator is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
 """
 Encapsulate some of the file handling stuff
 """
@@ -8,22 +26,24 @@ import numpy as np
 from msmbuilder import metrics, clustering
 from msmbuilder.Trajectory import Trajectory
 from sqlalchemy import create_engine
+import sqlalchemy.exc
 
 import models
+import sampling
 from utils import Singleton
 from database import Session
 
-#
-# SINGLETON OBJECT
-#
-# The first time that this object gets created, the __init__
-# method will run, but subsequently, calls to Project() will
-# just get you the same copy of the object back. We only want
-# one copy of the Project around at once, because we want everything
-# to have the same database connection
-      
+
 class Project(object):
     __metaclass__ = Singleton
+    # SINGLETON OBJECT
+    #
+    # The first time that this object gets created, the __init__
+    # method will run, but subsequently, calls to Project() will
+    # just get you the same copy of the object back. We only want
+    # one copy of the Project around at once, because we want everything
+    # to have the same database connection
+    
     
     def __init__(self, params_fn):
         """Load up by parse the yaml parameter file"""
@@ -78,35 +98,60 @@ class Project(object):
         self.symmetrize = params['symmetrize']
         self.lagtime = params['lagtime']
         self.trim = params['trim']
-        self.adaptive_sampling = params['adaptive_sampling']
         self.n_rounds = params['num_rounds']
         self.project_dir = params['project_dir']
         self.num_trajs_sufficient_for_round = params['num_trajs_sufficient_for_round']
-
-        if not self.method in ['implicit', 'explicit']:
-            raise ValueError()
-        if not os.path.exists(self.project_dir):
-            os.makedirs(self.project_dir)
-            
+        self.mysql_user = params['mysql_user']
+        self.mysql_password = params.pop('mysql_password', '')
+        self.mysql_db = params['mysql_db']
+        self.mysql_host = params['mysql_host']
+        
+        
+        self.adaptive_sampling = getattr(sampling, params['adaptive_sampling'])
+        
+        self.__validate()
         self.__connect_to_db()
         self.add_forcefields_to_db(params['forcefields'])
         
-
-    def __connect_to_db(self):       
-        db_path =  os.path.join(self.project_dir, 'db.sqlite')
-        engine = create_engine('sqlite:///{}'.format(db_path), echo=False)
-        Session.configure(bind=engine)
-        models.Base.metadata.create_all(engine) 
+    
+    def __validate(self):
+        if not self.method in ['implicit', 'explicit']:
+            raise ValueError(self.method)
+            
+        if not os.path.exists(self.project_dir):
+            os.makedirs(self.project_dir)
+            
+        if not self.symmetrize in ['mle', 'transpose', False, None]:
+            raise ValueError(self.symmetrize)
+            
+            
+    def __connect_to_db(self):
+        db_path = "mysql://{}:{}@{}/{}".format(self.mysql_user, self.mysql_password,
+                                               self.mysql_host, self.mysql_db)
+        db_path2 = "mysql://{}:{}@{}".format(self.mysql_user, self.mysql_password,
+                                             self.mysql_host)
+        def connect():
+            engine = create_engine(db_path, echo=False)
+            Session.configure(bind=engine)
+            models.Base.metadata.create_all(engine)
+        def create():
+            engine = create_engine(db_path2, echo=True)
+            connection = engine.connect()
+            connection.execute('CREATE DATABASE {};'.format(self.mysql_db))
+            connection.close()
         
+        try:
+            connect()
+        except sqlalchemy.exc.OperationalError:
+            create()
+            connect()
         
     def add_forcefields_to_db(self, p):
         if Session.query(models.Forcefield).count() == 0:
             # add forcefields
             for ff in p:
-                obj = models.Forcefield(name=ff['name'], water=ff['water'],
-                    driver=os.path.join(self.params_dir, ff['driver']),
-                    output_extension=ff['output_extension'],
-                    threads=ff['threads'])
+                obj = models.Forcefield(**ff)
+                obj.driver = os.path.join(self.params_dir, ff['driver'])
                     
                 Session.add(obj)
 

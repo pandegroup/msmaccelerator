@@ -4,11 +4,15 @@ forcefields:
     driver: test_driver.py
     output_extension: .xtc
     threads: 8
+    cost: 1
+    true_kinetics: False
   - name: amber99sb-ildn
     water: tip3p
     driver: test_driver.py
     threads: 8
     output_extension: .xtc
+    cost: 1
+    true_kinetics : True
 
 # if you supply a starting_confs_lh5, then the initial jobs will be generated
 # by randomly selecting conformations from that trajectory. Otherwise, all
@@ -25,6 +29,7 @@ pdb_topology_file: ala5.pdb  # this is used to generate the topolgy
 
 # if method=implict (the other option), then only a production_dry will be returned.
 method: explicit
+adaptive_sampling: myfavorite
 
 # MSM Builder Parameters
 metric:
@@ -38,13 +43,16 @@ clusterer:
 
 # MSM Building settings
 stride:                 1
-symmetrize:             None
+symmetrize:             False
 lagtime:                10
 trim:                   False
-cross_assign:           False
-adaptive_sampling:      even
 
 # Project settings
 project_dir: p1
 num_rounds: 100
-num_trajs_sufficient_for_round: 5
+num_trajs_sufficient_for_round: 1
+
+mysql_host: localhost
+mysql_user: root
+mysql_password: ''
+mysql_db: msmaccelerator
