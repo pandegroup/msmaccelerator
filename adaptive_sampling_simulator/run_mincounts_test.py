@@ -7,5 +7,5 @@ beta = 0.0 # mincounts
 
 counts_sampler = CountsSampler(beta) 
 
-output = test_sampling_method(CountsSampler, observable_function=total_states, transition_matrix=T, procs=12)
+output = test_sampling_method(counts_sampler, observable_function=total_states, transition_matrix=T, procs=12)
 plot_sampling_results( *output, obs_name='Number of States')

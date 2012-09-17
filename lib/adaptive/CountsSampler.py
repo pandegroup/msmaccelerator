@@ -1,3 +1,7 @@
+
+import numpy as np
+from scipy import stats
+
 class CountsSampler(object):
     """
     A method for counts-based sampling. Involves a temperature

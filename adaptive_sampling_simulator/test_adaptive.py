@@ -15,7 +15,7 @@ from scipy import stats, sparse
 import matplotlib.pyplot as plt
 
 from msmbuilder import MSMLib
-
+from msmbuilder import msm_analysis
 
 # --- observable_functions -----------------------------------------------------
 
@@ -200,7 +200,7 @@ def _run_trial(arg_dict):
         T = transition_matrix
         num_states = T.shape[0]
     T = sparse.csr_matrix(T)
-    MSMLib.check_transition(T)
+    msm_analysis.check_transition(T)
         
     if observable_function:
         try:
@@ -209,7 +209,7 @@ def _run_trial(arg_dict):
             print >> sys.stderr, e
             raise Exception("Error evaluating function: %s" % observable_function.__name__)
             
-    assignments[0,:size_of_intial_data] = MSMLib.sample(T, None, size_of_intial_data)
+    assignments[0,:size_of_intial_data] = msm_analysis.sample(T, None, size_of_intial_data)
 
     # iterate, adding simulation time
     for sampling_round in range(rounds_of_sampling):
@@ -233,10 +233,10 @@ def _run_trial(arg_dict):
         for i,init_state in enumerate(starting_states):
             a_ind = sampling_round * simultaneous_samplers + i + 1
             s_ind = length_of_sampling_trajs + 1
-            assignments[a_ind,:s_ind] = MSMLib.sample(T, init_state, s_ind)
+            assignments[a_ind,:s_ind] = msm_analysis.sample(T, init_state, s_ind)
 
         # build a new MSM from all the simulation so far
-        C_raw = MSMLib.get_count_matrix_from_assignments( assignments, NumStates=num_states )
+        C_raw = MSMLib.get_count_matrix_from_assignments( assignments, n_states=num_states )
         C_raw = C_raw + C_raw.T # might want to add trimming, etc.
         T_pred = MSMLib.estimate_transition_matrix(C_raw) 
 
