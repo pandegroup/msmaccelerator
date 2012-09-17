@@ -21,8 +21,9 @@ import glob
 
 setup(name='msmaccelerator',
       version = '0.1',
-      packages = ['msmaccelerator', 'msmaccelerator.scripts'],
-      package_dir = {'msmaccelerator':'lib',
-                     'msmaccelerator.scripts': 'scripts'},
+      packages = ['msmaccelerator', 'msmaccelerator.scripts', 'msmaccelerator.adaptive'],
+      package_dir = {'msmaccelerator': 'lib',
+                     'msmaccelerator.scripts': 'scripts',
+                     'msmaccelerator.adaptive': 'lib/adaptive'},
       scripts = glob.glob('scripts/*'),
 )

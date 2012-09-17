@@ -42,7 +42,7 @@ class dirichlet(object):
         return T
 
     
-class telescopic_estimator(dirichlet):
+class TelescopicSampler(dirichlet):
     """
     Combines data from many forcefields to provide a best estimate
     of the transition matrix parameters for some gold standard
