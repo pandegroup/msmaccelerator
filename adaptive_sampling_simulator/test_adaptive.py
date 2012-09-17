@@ -195,12 +195,12 @@ def _run_trial(arg_dict):
         assert num_states > 0
         C_rand = np.random.randint( 0, 100, (num_states, num_states) )
         C_rand += C_rand.T
-        T = MSMLib.EstimateTransitionMatrix( C_rand )
+        T = MSMLib.estimate_transition_matrix( C_rand )
     else:
         T = transition_matrix
         num_states = T.shape[0]
     T = sparse.csr_matrix(T)
-    MSMLib.CheckTransition(T)
+    MSMLib.check_transition(T)
         
     if observable_function:
         try:
@@ -209,7 +209,7 @@ def _run_trial(arg_dict):
             print >> sys.stderr, e
             raise Exception("Error evaluating function: %s" % observable_function.__name__)
             
-    assignments[0,:size_of_intial_data] = MSMLib.Sample(T, None, size_of_intial_data)
+    assignments[0,:size_of_intial_data] = MSMLib.sample(T, None, size_of_intial_data)
 
     # iterate, adding simulation time
     for sampling_round in range(rounds_of_sampling):
@@ -217,15 +217,15 @@ def _run_trial(arg_dict):
         # apply the adaptive sampling method - we need to be true to what a
         # real simulation would actually see for the counts matrix
         mod_assignments = assignments.copy()
-        mapping = MSMLib.RenumberStates( mod_assignments )
-        C_mod = MSMLib.GetCountMatrixFromAssignments( mod_assignments )
-        T_mod = MSMLib.EstimateTransitionMatrix(C_mod)
+        mapping = MSMLib.renumber_states( mod_assignments )
+        C_mod = MSMLib.get_count_matrix_from_assignments( mod_assignments )
+        T_mod = MSMLib.estimate_transition_matrix(C_mod)
         adaptive_sampling_multivariate = SamplerObject.sample(C_mod)
 
         # choose the states to sample from (in the original indexing)
         state_inds = np.arange(len(adaptive_sampling_multivariate))
-        sampler = stats.rv_discrete(name='sampler', values=[state_inds,
-                                                                adaptive_sampling_multivariate])
+        sampler = stats.rv_discrete(name='sampler', 
+                                    values=[state_inds, adaptive_sampling_multivariate])
         starting_states = sampler.rvs( size=simultaneous_samplers )
         starting_states = mapping[starting_states]
 
@@ -233,12 +233,12 @@ def _run_trial(arg_dict):
         for i,init_state in enumerate(starting_states):
             a_ind = sampling_round * simultaneous_samplers + i + 1
             s_ind = length_of_sampling_trajs + 1
-            assignments[a_ind,:s_ind] = MSMLib.Sample(T, init_state, s_ind)
+            assignments[a_ind,:s_ind] = MSMLib.sample(T, init_state, s_ind)
 
         # build a new MSM from all the simulation so far
-        C_raw = MSMLib.GetCountMatrixFromAssignments( assignments, NumStates=num_states )
+        C_raw = MSMLib.get_count_matrix_from_assignments( assignments, NumStates=num_states )
         C_raw = C_raw + C_raw.T # might want to add trimming, etc.
-        T_pred = MSMLib.EstimateTransitionMatrix(C_raw) 
+        T_pred = MSMLib.estimate_transition_matrix(C_raw) 
 
         # calculate the error between the real transition matrix and our best prediction
         assert T.shape == T_pred.shape
