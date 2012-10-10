@@ -182,11 +182,11 @@ class Trajectory(Base, _PopulateMixin):
         """
         
         if self.wet_xtc_fn is not None:
-            conf = msmbuilder.Trajectory.LoadTrajectoryFile(str(self.last_wet_snapshot_fn))
-            xyz = msmbuilder.Trajectory.ReadFrame(str(self.wet_xtc_fn), frame_index)
+            conf = msmbuilder.Trajectory.load_trajectory_file(str(self.last_wet_snapshot_fn))
+            xyz = msmbuilder.Trajectory.read_frame(str(self.wet_xtc_fn), frame_index)
         else:
-            conf = msmbuilder.Trajectory.LoadTrajectoryFile(Project().pdb_topology_file)
-            xyz = msmbuilder.Trajectory.ReadFrame(str(xtc_path), frame_index)
+            conf = msmbuilder.Trajectory.load_trajectory_file(Project().pdb_topology_file)
+            xyz = msmbuilder.Trajectory.read_frame(str(xtc_path), frame_index)
 
         if not (xyz.shape == conf['XYZList'][0,:,:].shape):
             raise Exception("Number of atoms is wrong: xyz.shape={0}, conf['XYZList'][0,:,:].shape={1}".format(xyz.shape, conf['XYZList'][0,:,:].shape))

@@ -23,7 +23,7 @@ from operator import itemgetter
 import logging
 import logging.handlers
 import msmbuilder.Trajectory
-import msmbuilder.Serializer
+import msmbuilder.io
 import scipy.io
 import cPickle as pickle
 import sys, os
@@ -39,9 +39,9 @@ def load_file(path):
     if ext == '.mtx':
         return scipy.io.mmread(path)
     elif ext == '.h5':
-        return msmbuilder.Serializer.LoadData(path)
+        return msmbuilder.io.loadh(path, 'Data') # TJL: check array
     elif ext in ['.lh5', '.pdb']:
-        return msmbuilder.Trajectory.LoadTrajectoryFile(path)
+        return msmbuilder.Trajectory.load_trajectory_file(path)
     elif ext == '.pickl':
         return pickle.load(open(path))
     else:
@@ -57,13 +57,13 @@ def save_file(path, value):
     if ext == '.mtx':
         return scipy.io.mmwrite(path, value)
     elif ext == '.h5':
-        return msmbuilder.Serializer.SaveData(path, value)
+        return msmbuilder.io.saveh(path, Data=value) # TJL: believe this should work w/the above
     elif ext == '.lh5':
-        return value.SaveToLHDF(path)
+        return value.save_to_lhdf(path)
     elif ext == '.xtc':
-        return value.SaveToXTC(path)
+        return value.save_to_xtc(path)
     elif ext == '.pdb':
-        return value.SaveToPDB(path)
+        return value.save_to_pdb(path)
     elif ext == '.pickl':
         return pickle.dump(value, open(path, 'w'))
     else:
@@ -82,8 +82,6 @@ class Singleton(type):
 
         return self.instance
         
-        
-
 
 class GMailHandler(logging.handlers.SMTPHandler):
     "Logging handler to send email from an msmaccelerator account"

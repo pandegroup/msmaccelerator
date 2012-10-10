@@ -23,10 +23,9 @@ import numbers
 from collections import defaultdict
 
 # msmbuilder imports
-from msmbuilder.MSMLib import GetCountMatrixFromAssignments
-from msmbuilder.MSMLib import EstimateReversibleCountMatrix
-from msmbuilder.MSMLib import ErgodicTrim, ApplyMappingToAssignments
-from msmbuilder import clustering, metrics
+from msmbuilder import MSMLib
+from msmbuilder import clustering
+from msmbuilder import metrics
 import msmbuilder.Trajectory
 from msmbuilder.assigning import assign_in_memory
 
@@ -246,7 +245,7 @@ def construct_counts_matrix(assignments):
     """
         
     n_states  = np.max(assignments.flatten()) + 1
-    raw_counts = GetCountMatrixFromAssignments(assignments, n_states,
+    raw_counts = MSMLib.get_count_matrix_from_assignments(assignments, n_states,
                                                LagTime=Project().lagtime, Slide=True)
         
     ergodic_counts = None
@@ -255,11 +254,11 @@ def construct_counts_matrix(assignments):
                                    'we need to keep track of the mapping from trimmed to '
                                    ' untrimmed states for joint clustering to be right'))
         try:
-            ergodic_counts, mapping = ErgodicTrim(raw_counts)
-            ApplyMappingToAssignments(assignments, mapping)
+            ergodic_counts, mapping = MSMLib.ergodic_trim(raw_counts)
+            MSMLib.apply_mapping_to_assignments(assignments, mapping)
             counts = ergodic_counts
         except Exception as e:
-            logger.warning("ErgodicTrim failed with message '{0}'".format(e))
+            logger.warning("MSMLib.ergodic_trim failed with message '{0}'".format(e))
 
     else:
         logger.info("Ignoring ergodic trimming")
@@ -270,7 +269,7 @@ def construct_counts_matrix(assignments):
         counts = counts + counts.T
     elif Project().symmetrize == 'mle':
         logger.debug('MLE symmetrizing')
-        counts = EstimateReversibleCountMatrix(counts)
+        counts = MSMLib.mle_reversible_count_matrix(counts)
     elif Project().symmetrize == 'none' or (not Project().symmetrize):
         logger.debug('Skipping symmetrization')
     else:

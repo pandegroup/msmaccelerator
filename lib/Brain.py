@@ -25,7 +25,6 @@ import subprocess
 import logging
 
 import msmbuilder.Trajectory
-import msmbuilder.Serializer
 import cPickle as pickle
 
 from collections import defaultdict
@@ -118,9 +117,8 @@ def generate_job():
 
     else:
         # we're shooting in a new forcefield
-        # NOTE
-        # ======
         # SHOULD WE DO EQUILIBRATION INSTEAD OF PRODUCTION?
+        # TJL sayz yes, we definitely should
         # ======
         t = Trajectory(
             forcefield=forcefield,
@@ -150,7 +148,7 @@ def _generate_equilibration_job():
     """
         
     logger.info('Constructing initial equilibration job')
-    conf = msmbuilder.Trajectory.LoadFromPDB(Project().pdb_topology_file)
+    conf = msmbuilder.Trajectory.load_from_pdb(Project().pdb_topology_file)
         
         
     if Project().starting_confs_lh5 is None:
@@ -160,9 +158,9 @@ def _generate_equilibration_job():
         logger.info('Using pdb topolgy to start equlibration run')
         name = 'equilibration, starting from pdb toplogy'
     else:
-        num_frames = msmbuilder.Trajectory.LoadFromLHDF(Project().starting_confs_lh5, JustInspect=True)[0]
+        num_frames = msmbuilder.Trajectory.load_from_lhdf(Project().starting_confs_lh5, JustInspect=True)[0]
         r = np.random.randint(num_frames)
-        xyz = msmbuilder.Trajectory.ReadLHDF5Frame(Project().starting_confs_lh5, r)
+        xyz = msmbuilder.Trajectory.read_lhdf_frame(Project().starting_confs_lh5, r)
         conf['XYZList'] = np.array([xyz])
         logger.info('Using frame %s of starting_confs_lh5 (%s) to start equilibration run' % (r, Project().starting_confs_lh5))
         name = 'equilibration, starting from frame %s of starting_confs_lh5 (%s)' %  (r, Project().starting_confs_lh5) 

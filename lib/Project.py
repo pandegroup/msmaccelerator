@@ -24,7 +24,6 @@ import os, sys
 import functools
 import numpy as np
 from msmbuilder import metrics, clustering
-from msmbuilder.Trajectory import Trajectory
 from sqlalchemy import create_engine
 import sqlalchemy.exc
 

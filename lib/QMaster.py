@@ -234,7 +234,7 @@ class QMaster(threading.Thread):
         try:
             # save lh5 version of the trajectory
             conf = load_file(self.project.pdb_topology_file)
-            coordinates = msmbuilder.Trajectory.LoadTrajectoryFile(str(traj.dry_xtc_fn), Conf=conf)
+            coordinates = msmbuilder.Trajectory.load_trajectory_file(str(traj.dry_xtc_fn), Conf=conf)
             save_file(traj.lh5_fn, coordinates)
         
         except Exception as e:
