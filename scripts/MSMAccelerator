@@ -52,14 +52,14 @@ def setup_logger(file_level, email_level, filename, email_addrs, email_subject='
     
 def main():
     # Parse arguments
-    parser = arglib.ArgumentParser(description='MSMAccelerator: Adaptive Sampling Markov State Model Molecular Dynamics')
-    parser.add_argument('project_filename', description='MSMAccelerator Project File (.yaml)')
-    parser.add_argument('port', description='Port for work queue to send jobs on.', default=5521, type=int)
-    parser.add_argument('file_log', description='Filename to log to', default=False)
-    parser.add_argument('email_log', description='Email address(es) to send log events to', nargs='+', type=list, default=[])
-    parser.add_argument('file_level', description='Log level for file',
+    parser = arglib.ArgumentParser() #help='MSMAccelerator: Adaptive Sampling Markov State Model Molecular Dynamics')
+    parser.add_argument('project_filename', help='MSMAccelerator Project File (.yaml)')
+    parser.add_argument('port', help='Port for work queue to send jobs on.', default=5521, type=int)
+    parser.add_argument('file_log', help='Filename to log to', default='msmaccelerator.log')
+    parser.add_argument('email_log', help='Email address(es) to send log events to', nargs='+', type=list, default=[])
+    parser.add_argument('file_level', help='Log level for file',
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='INFO')
-    parser.add_argument('email_level', description='Email address to send log events to',
+    parser.add_argument('email_level', help='Email address to send log events to',
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], default='ERROR')
     args = parser.parse_args()
     
