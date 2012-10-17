@@ -37,9 +37,6 @@ from database import _connect_to_mysql_db, _connect_to_sqlite_db
 SQL_BACKEND = 'sqlite'
 
 
-logger = logging.getLogger('MSMAccelerator.Project')
-
-
 class Project(object):
     __metaclass__ = Singleton
     # SINGLETON OBJECT
@@ -151,7 +148,8 @@ class Project(object):
             Session.commit()
 
         else:
-            logger.error("NOTE: I'M NOT PARSING NEW FORCEFIELDS")
+            #logger.error("NOTE: I'M NOT PARSING NEW FORCEFIELDS")
+            print "NOTE: I'M NOT PARSING NEW FORCEFIELDS"
         
         
 # if there is a parameter called starting_confs_lh5, we'll randomly pull

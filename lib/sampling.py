@@ -130,6 +130,15 @@ def myfavorite(Session, msmgroup):
 
 #==============================================================================#    
 
+
+def default(Session, msmgroup):
+    """
+    If MSMAccelerator can't call any adaptive routine, or none is specified, use
+    this one. We default to even sampling.
+    """
+    even_sampling(Session, msmgroup)
+
+
 def even_sampling(Session, msmgroup):
     """
     Choose each state with equal probability (uniform dist. over states, ffs)
@@ -167,15 +176,12 @@ def counts_based(Session, msmgroup, beta=0.0):
 
     n_forcefields = len(msmgroup.markov_models)
 
-    # put all the weight on the first forcefield
-    ff_weights = np.zeros(n_forcefields)
-    ff_weights[0] = 1.0
+    microstate_weights = [None] * n_forcefields
 
-    microstate_weights = [None] * num_forcefields
-
-    for i, msm in enumerate(msmgroup.markov_models):
+    for msm in msmgroup.markov_models:
         sampler = adaptive.CountsSampler(beta)
-        microstate_weights[i] = sampler.sample(msm.counts)
+        msm.microstate_selection_weights = sampler.sample(msm.counts)
+        msm.model_selection_weight = 1 # equal chance of selecting any FF
         
         logger.info("%s selection weight: %f", msm.forcefield.name, msm.model_selection_weight)
 

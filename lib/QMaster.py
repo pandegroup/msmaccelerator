@@ -218,10 +218,7 @@ class QMaster(threading.Thread):
         task.specify_algorithm(WORK_QUEUE_SCHEDULE_FILES) # what does this do?
         
         traj.submit_time = datetime.now()
-        
-        # need to do a commit from this the qmaster, since this is a different
-        # session
-        Session.commit()
+
         self.wq.submit(task)    
         logger.info('Submitted to queue: %s', traj)
     
@@ -251,8 +248,6 @@ class QMaster(threading.Thread):
         traj.host = task.host
         traj.returned_time = datetime.now()
         traj.length = len(coordinates)
-        Session.flush()
-        Session.commit()
         logger.info('Finished converting new traj to lh5 sucessfully')
 
 
