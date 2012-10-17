@@ -28,7 +28,7 @@ from datetime import datetime
 
 import msmbuilder.Trajectory
 import models
-from database import Session
+from database import Session, with_db_lock
 from utils import save_file, load_file
 
 
@@ -89,7 +89,6 @@ class QMaster(threading.Thread):
     def run(self):
         """Main thread-loop for the QMaster thread"""
         last_print = time.time()
-        
         
         while True:
             time.sleep(self.wake_freq)
@@ -167,6 +166,7 @@ class QMaster(threading.Thread):
             raise Exception('Bad wakeup cause')
         return cause
     
+    @with_db_lock
     def submit(self, traj):
         """ Submit a job to the work-queue for further sampling.
         
@@ -224,7 +224,8 @@ class QMaster(threading.Thread):
         Session.commit()
         self.wq.submit(task)    
         logger.info('Submitted to queue: %s', traj)
-        
+    
+    @with_db_lock
     def on_return(self, task):
         """Called by main thread on the return of data from the workers.
         Post-processing"""
@@ -251,6 +252,7 @@ class QMaster(threading.Thread):
         traj.returned_time = datetime.now()
         traj.length = len(coordinates)
         Session.flush()
+        Session.commit()
         logger.info('Finished converting new traj to lh5 sucessfully')
 
 

@@ -24,14 +24,16 @@ import os, sys
 import functools
 import numpy as np
 from msmbuilder import metrics, clustering
-from sqlalchemy import create_engine
-import sqlalchemy.exc
 
 import models
 import sampling
 from utils import Singleton
-from database import Session
+from database import Session, with_db_lock
+from database import _connect_to_mysql_db, _connect_to_sqlite_db
 
+
+#SQL_BACKEND = 'mysql'
+SQL_BACKEND = 'sqlite'
 
 class Project(object):
     __metaclass__ = Singleton
@@ -70,11 +72,8 @@ class Project(object):
         yaml.add_constructor('!clusterer', clustering_loader)
         
         # parse the yaml file
-
-
         with open(params_fn) as f:
             params = yaml.load(f)
-
         
         self.metric = params['metric']['type'](**params['metric']['init_kwargs'])
         self.clusterer = functools.partial(params['clusterer']['type'], metric=self.metric, **params['clusterer']['init_kwargs'])
@@ -100,16 +99,26 @@ class Project(object):
         self.n_rounds = params['num_rounds']
         self.project_dir = params['project_dir']
         self.num_trajs_sufficient_for_round = params['num_trajs_sufficient_for_round']
-        self.mysql_user = params['mysql_user']
-        self.mysql_password = params.pop('mysql_password', '')
-        self.mysql_db = params['mysql_db']
-        self.mysql_host = params['mysql_host']
-        
         
         self.adaptive_sampling = getattr(sampling, params['adaptive_sampling'])
         
         self.__validate()
-        self.__connect_to_db()
+        
+        
+        # connect to a mysql database
+        if SQL_BACKEND == 'mysql':
+            self.mysql_user = params['mysql_user']
+            self.mysql_password = params.pop('mysql_password', '')
+            self.mysql_db = params['mysql_db']
+            self.mysql_host = params['mysql_host']
+            _connect_to_mysql_db(self.mysql_user, self.mysql_password, self.mysql_host, self.mysql_db)
+        elif SQL_BACKEND == 'sqlite':
+            # connect to a sqlite database
+            # stored in <project_dir>/db.sqlite
+            _connect_to_sqlite_db(db_path=os.path.join(self.project_dir, 'db.sqlite'))
+        else:
+            raise ValueError('SQL_BACKEND=%s is not supported' % SQL_BACKEND)
+        
         self.add_forcefields_to_db(params['forcefields'])
         
     
@@ -123,28 +132,7 @@ class Project(object):
         if not self.symmetrize in ['mle', 'transpose', False, None]:
             raise ValueError(self.symmetrize)
             
-            
-    def __connect_to_db(self):
-        db_path = "mysql://{}:{}@{}/{}".format(self.mysql_user, self.mysql_password,
-                                               self.mysql_host, self.mysql_db)
-        db_path2 = "mysql://{}:{}@{}".format(self.mysql_user, self.mysql_password,
-                                             self.mysql_host)
-        def connect():
-            engine = create_engine(db_path, echo=False)
-            Session.configure(bind=engine)
-            models.Base.metadata.create_all(engine)
-        def create():
-            engine = create_engine(db_path2, echo=True)
-            connection = engine.connect()
-            connection.execute('CREATE DATABASE {};'.format(self.mysql_db))
-            connection.close()
-        
-        try:
-            connect()
-        except sqlalchemy.exc.OperationalError:
-            create()
-            connect()
-        
+    @with_db_lock
     def add_forcefields_to_db(self, p):
         if Session.query(models.Forcefield).count() == 0:
             # add forcefields
