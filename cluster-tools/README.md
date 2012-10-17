@@ -1,9 +1,6 @@
 Running Workers on Clusters
 ---------------------------
 
-TJL 6.9.12
-
-
 This is a short guide about how to set up a cluster to run workers. We've
 provided some scripts to get you going immediately, though you may need
 to modify these for your own personal configuration.
@@ -28,28 +25,39 @@ heterogeneity in clusters, something is likely to break, and you'll have
 to make small modifications.
 
 Once all the necessary software is installed, it's time to boot up some
-workers! Submit a bunch of workers with the scripts
+workers! Submit a bunch of workers with the script
 
-    sge_submit_workers
     pbs_submit_workers
-    pbs_submit_workers_tunnel (see notes below)
 
-each of which should be in your path. These scripts will each submit a
-specified number of jobs, each with a number of workers running a number
-of threads. E.G.
+which should be in your path. To figure out how to use this, do the obvious
 
-    Usage: sge_submit_workers [options] <servername> <port> <num-workers>
-    $ ./pbs_submit_workers mycomputer 5521 12
+	./pbs_submit_workers -h
+	
+yielding
+	
+	Use: pbs_submit_workers [options] <servername> <port> <num-nodes> <ppn> <pbs-queue> <walltime> <workers-per-node>
+	where options are:
+	  -a               Enable auto mode.
+	  -f               Set up SSH forwarding through the head node (if work nodes cannot connect to the internet)
+	  -g               Enable GPU run (sets the CUDA device ID)
+	  -s               Run as a shared worker.
+	  -N <name>        Preferred master name.
+	  -C <catalog>     Set catalog server to <catalog>. <catalog> format: HOSTNAME:PORT.
+	  -t <time>        Abort after this amount of idle time. (default=900s)
+	  -p <parameters>  SGE qsub parameters.
+	  -h               Show this help message.
 
-submits 12 PBS jobs, each running X workers, each worker running X threads.
+thus, a normal command call on one of our clusters looks like
+
+    ./pbs_submit_workers vspm42 5521 3 24 default 24:00:00 3
+
+which starts up PBS jobs (default queue) on 3 nodes, each running 3 workers, with each worker using 8 threads (24 ppn). These workers try to communicate with the machine `vspm42` on port 5521, and die after 24 hours.
 
 That's pretty much it! Boot up a master and get crackin'!
 
-Notes on the script `pbs_submit_workers_tunnel`:
-This script is designed to work similarly to the others, but on clusters
-where compute nodes cannot connect to the internet (but the head node can).
-In this script, the worker jobs starts an ssh tunnel that routes communication
+Notes on the `-f` flag:
+On clusters where compute nodes cannot connect to the internet (but the head node can) the worker jobs starts an ssh tunnel that routes communication
 to the server/master through the cluster head node. If you're going to use
-this script we strongly recommend you ensure everything is working for your
+this feature we strongly recommend you ensure everything is working for your
 particular system.
 
