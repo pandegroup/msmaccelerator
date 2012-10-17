@@ -101,6 +101,7 @@ class Project(object):
         self.num_trajs_sufficient_for_round = params['num_trajs_sufficient_for_round']
         
         self.adaptive_sampling = getattr(sampling, params['adaptive_sampling'])
+        self.adaptive_options = params['adaptive_sampling']['adaptive_options']
         
         self.__validate()
         
@@ -145,7 +146,7 @@ class Project(object):
             Session.commit()
 
         else:
-            print "NOTE: I'M NOT PARSING NEW FORCEFIELDS"
+            logger.error("NOTE: I'M NOT PARSING NEW FORCEFIELDS")
         
         
 # if there is a parameter called starting_confs_lh5, we'll randomly pull

@@ -73,6 +73,9 @@ from msmaccelerator.models import Trajectory, Forcefield, MarkovModel, MSMGroup
 from sqlalchemy.sql import and_, or_, not_
 from sqlalchemy import func
 
+import adpative
+
+logger = logging.getLogger('MSMAccelerator.sampling')
 
 
 def myfavorite(Session, msmgroup):
@@ -127,48 +130,53 @@ def myfavorite(Session, msmgroup):
 
 #==============================================================================#    
 
-def default(Session, msmgroup):
+def even_sampling(Session, msmgroup):
+    """
+    Choose each state with equal probability (uniform dist. over states, ffs)
+    """
     for msm in msmgroup.markov_models:
         msm.microstate_selection_weights = np.ones(msmgroup.n_states)
         msm.model_selection_weight = 1
 
 
-def even_sampling(Session, msm):
-    msm.microstate_selection_weights = np.ones(msm.msm_group.n_states)
+def counts_based(Session, msmgroup, beta=0.0):
+    """ 
+    This is a simple counts-based adaptive sampling algorithm that places new 
+    simulations in states according to how many times those states have been
+    "seen".
+    
+    In [1] it was shown that this algorithm with beta=0 ("mincounts sampling")
+    was particularly efficient at exploring space.
+    
+    Parameters
+    ----------
+    beta : float (optional)
+        A float in [0, inf] that represents an inverse temperature. Low beta
+        (< 1.0) corresponds to putting simulations in under-sampled areas, 
+        beta = 1.0 corresponds to even sampling, and beta > 1.0 corresponds to
+        sampling already sampled regions.
+    
+    References
+    ----------
+    ..[1] Weber, J. K. & Pande, V. S. Characterization and Rapid Sampling of 
+    Protein Folding Markov State Model Topologies. J. Chem. Theory Comput.
+    7, 3405–3411 (2011).
+    """
 
+    logger.info("Running counts-based sampling with inverse temp: %f" % beta)
 
-def explorative_counts(forcefields):
-    """ This is a simple counts-based adaptive sampling algorithm that
-        maximizes the size of explored space """
-
-    raise NotImplementedError()
-
-    beta = 0.0 # setting the temp to 0 means full explorer mode
-    num_forcefields = len(forcefields)
+    n_forcefields = len(msmgroup.markov_models)
 
     # put all the weight on the first forcefield
-    ff_weights = np.zeros(num_forcefields)
+    ff_weights = np.zeros(n_forcefields)
     ff_weights[0] = 1.0
 
     microstate_weights = [None] * num_forcefields
 
-    for i, ff in enumerate(forcefields):
-        num_microstates = ff['counts'].shape[0]
-        sampler = counts_sampler(beta)
-        microstate_weights[i] = sampler.sample(ff['counts'])
-
-    return ff_weights, microstate_weights
-
+    for i, msm in enumerate(msmgroup.markov_models):
+        sampler = adaptive.CountsSampler(beta)
+        microstate_weights[i] = sampler.sample(msm.counts)
+        
+        logger.info("%s selection weight: %f", msm.forcefield.name, msm.model_selection_weight)
 
 
-### Testing -------------------------------------------------------------------    
-# a simple test to make sure function calls are returning properly, each 
-# routine should be included here (probably)
-
-if __name__ == '__main__':
-    print even([{'name': 1,   'counts': sparse.eye(10,10)},
-                {'name': 2,   'counts': sparse.eye(10,10)},
-                {'name': 'a', 'counts': sparse.eye(10,10)}])
-    print explorative_counts([{'name': 1,   'counts': sparse.eye(10,10)},
-                              {'name': 2,   'counts': sparse.eye(10,10)},
-                              {'name': 'a', 'counts': sparse.eye(10,10)}])
