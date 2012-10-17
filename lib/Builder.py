@@ -38,10 +38,12 @@ from utils import load_file, save_file
 
 logger = logging.getLogger('MSMAccelerator.Builder')
 
+@with_db_lock
 def n_rounds():
     "Number of groups of MSMs that have been built"
     return Session.query(MSMGroup).count()
 
+@with_db_lock
 def is_sufficient_new_data():
     """Is there sufficient new data to build a new round?
         
@@ -150,7 +152,7 @@ def run_round(checkdata=True):
     logger.info("Round completed sucessfully")
     return True
 
-
+@with_db_lock
 def joint_clustering():
     """Jointly cluster the the data from all of the forcefields
     
