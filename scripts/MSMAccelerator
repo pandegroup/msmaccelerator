@@ -20,7 +20,7 @@
 
 import os, sys
 from msmbuilder import arglib
-from msmaccelerator import Sampling, QMaster, Builder, Brain, Project
+from msmaccelerator import QMaster, Builder, Brain, Project
 import logging
 from msmaccelerator.utils import GMailHandler
 import IPython as ip
