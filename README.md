@@ -60,21 +60,30 @@ file and are thus invisible to the rest of MSMAccelerator.
 Dependencies
 ------------
 
+MSMAccelerator depends on
+
+* MSMBuilder (http://www.github.com/simtk/msmbuilder)
+* WorkQueue  (http://nd.edu/~ccl/software/workqueue)
+* specific python modules (see below)
+
 MSMAccelerator is written in python2.7. We recommend the Enthought python
-distribution (EPD). It depends on MSMBuilder (https://simtk.org/home/msmbuilder/).
+distribution (EPD), which comes with pre-compiled binaries for most of the
+dependencies. EPD is free for academics (http://www.enthought.com/).
 
 WorkQueue and its python bindings are required, and are not always trivial to
 install. WorkQueue is distributed as a part of "CCTools", and we use a forked
 version of the CCTools package, which is hosted at
-https://github.com/rmcgibbo/cctools-3.4.2-fork. See the install instructions in
-that package for details on compiling it.
+
+    https://github.com/rmcgibbo/cctools-3.4.2-fork
+
+See the install instructions in that package for details on compiling it.
 
 For the database component, we use MySQL, mysql-python and SQLAlchemy. Either a
 dedicated MySQL server or a running instance on your local machine is required.
 
 mysql-python does not ship by default with EPD, but can be installed with
 
-$ easy_install mysql-python
+    easy_install mysql-python
 
 On a fresh Ubuntu 11.10 instance, I used the following commands to get mysql setup
 (with python bindings)
@@ -86,10 +95,10 @@ On a fresh Ubuntu 11.10 instance, I used the following commands to get mysql set
 If you're not using EPD python, the python packages that you'll need to install
 include, but may not be limited to
 
-numpy
-scipy
-tables
-MSMBuilder
-SQLAlchemy
-mysql-python
+* numpy
+* scipy
+* tables
+* MSMBuilder
+* SQLAlchemy
+* mysql-python
 
