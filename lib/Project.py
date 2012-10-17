@@ -20,6 +20,7 @@
 Encapsulate some of the file handling stuff
 """
 import yaml
+import logging
 import os, sys
 import functools
 import numpy as np
@@ -34,6 +35,10 @@ from database import _connect_to_mysql_db, _connect_to_sqlite_db
 
 #SQL_BACKEND = 'mysql'
 SQL_BACKEND = 'sqlite'
+
+
+logger = logging.getLogger('MSMAccelerator.Project')
+
 
 class Project(object):
     __metaclass__ = Singleton
@@ -100,7 +105,8 @@ class Project(object):
         self.project_dir = params['project_dir']
         self.num_trajs_sufficient_for_round = params['num_trajs_sufficient_for_round']
         
-        self.adaptive_sampling = getattr(sampling, params['adaptive_sampling'])
+        self.adaptive_sampling = getattr(sampling, params['adaptive_sampling']['adaptive_algorithm'])
+        self.adaptive_parameters = params['adaptive_sampling']['adaptive_parameters']
         
         self.__validate()
         
@@ -145,7 +151,7 @@ class Project(object):
             Session.commit()
 
         else:
-            print "NOTE: I'M NOT PARSING NEW FORCEFIELDS"
+            logger.error("NOTE: I'M NOT PARSING NEW FORCEFIELDS")
         
         
 # if there is a parameter called starting_confs_lh5, we'll randomly pull

@@ -29,7 +29,10 @@ pdb_topology_file: ala5.pdb  # this is used to generate the topolgy
 
 # if method=implict (the other option), then only a production_dry will be returned.
 method: explicit
-adaptive_sampling: myfavorite
+adaptive_sampling: 
+  adaptive_algorithm: counts_based # we'll use mincounts
+  adaptive_parameters:
+    beta: 0.0
 
 # MSM Builder Parameters
 metric:

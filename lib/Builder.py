@@ -114,7 +114,6 @@ def run_round(checkdata=True):
     msmgroup.n_states = len(generators)
     save_file(msmgroup.generators_fn, generators)
 
-        
     for msm in msmgroup.markov_models:
         msm.populate_default_filenames()
         if hasattr(msm, 'counts'):
@@ -125,27 +124,28 @@ def run_round(checkdata=True):
             save_file(msm.distances_fn, msm.distances)
             save_file(msm.inverse_assignments_fn, dict(MSMLib.invert_assignments(msm.assignments)))
         
-
-    # ======================================================================#
+    # ====================================================================== #
     # HERE IS WHERE THE ADAPTIVE SAMPLING ALGORITHMS GET CALLED
-    # The obligation of the adaptive_sampling routine is to set the
-    # model_selection_weight on each MSM/forcefield and the microstate
-    # selection weights
-    # check to make sure that the right fields were populated
+    # The obligation of the adaptive_sampling routine is to set the 
+    # model_selection_weight on each MSM/forcefield and the microstate selection
+    # weights
+    
     try:
-        Project().adaptive_sampling(Session, msmgroup)
+        Project().adaptive_sampling(Session, msmgroup, **Project().adaptive_parameters)
         
         for msm in msmgroup.markov_models:
             if not isinstance(msm.model_selection_weight, numbers.Number):
                 raise ValueError('model selection weight on %s not set correctly' % msm)
             if not isinstance(msm.microstate_selection_weights, np.ndarray):
                 raise ValueError('microstate_selection_weights on %s not set correctly' % msm)
+                
     except Exception as e:
-        logging.error('ADAPTIVE SAMPLING ERROR')
+        logging.error('ADAPTIVE SAMPLING ERROR -- Could not run sampling algorithm')
         logging.error(e)
+        logging.error('APPLYING DEFAULT ADAPTIVE ALGORITHM')
         sampling.default(Session, msmgroup)
         
-    #=======================================================================#
+    #======================================================================= #
 
         
     Session.flush()       
