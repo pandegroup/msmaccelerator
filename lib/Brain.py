@@ -31,7 +31,7 @@ from collections import defaultdict
 from msmaccelerator import Project
 from utils import lru_cache
 from models import Trajectory, Forcefield, MarkovModel, MSMGroup
-from database import Session
+from database import Session, with_db_lock
 from utils import load_file, save_file
 
 logger = logging.getLogger('MSMAccelerator.Brain')
@@ -53,7 +53,9 @@ def multinomial(weights):
         The index of the selected item
     """
     return np.where(np.random.multinomial(n=1, pvals=weights / np.sum(weights)))[0][0]
-    
+
+
+@with_db_lock
 def generate_job():
     """Generate a single job from the most recent MSMs
     
@@ -100,13 +102,13 @@ def generate_job():
         confs_per_model.append(n_confs)
 
     model_to_draw_from = msmgroup.markov_models[multinomial(confs_per_model)]
-    assigned_to = model_to_draw_from.inv_assignmnets[selected_microstate]
-    r = np.random.randint(len(assigned_to))
-    trj_i, frame_i = assigned_to[r]
+    trjs, frames = model_to_draw_from.inv_assignmnets[selected_microstate]
+    r = np.random.randint(len(trjs))
+    #import IPython as ip; ip.embed()
+    trj_i, frame_i = trjs[r], frames[r]
     
     conf =  model_to_draw_from.trajectories[trj_i].extract_wet_frame(frame_i)
-        
-        
+    
     logger.info('Drew conformation from %s, shooting in %s', model_to_draw_from.forcefield.name, forcefield.name)
     if forcefield == model_to_draw_from.forcefield:
         # we're shooting in the same forcefield the conf was generated in
