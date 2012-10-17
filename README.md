@@ -1,11 +1,14 @@
 MSMAccelerator
 ==============
 
+We believe running MD should be faster and easier. If you agree, MSMAccelerator is for you!
+
+MSMAccelerator is a tool for abstraction, allowing the researcher to worry about what systems they want to run, and how to sample those systems most efficiently, rather than worry about resource or data management.
+
 Overview
 --------
 
-MSMAccelerator is an adaptive sampling engine for Markov state model powered
-molecular dynamics simulations.
+MSMAccelerator is an adaptive sampling engine for Markov state model (MSM) powered molecular dynamics simulations.
 
 The basic idea is to interlace simulation and analysis together --
 MSMAccelerator automates the process of building models, identifying the
@@ -15,12 +18,26 @@ reanalyzing the data.
 The MD simulations can be done remotely with heterogeneous compute hardware.
 MSMAccelerator connects to the compute nodes using WorkQueue
 (http://nd.edu/~ccl/software/workqueue/), a scalable Master/Worker framework.
-The only requirement is that the compute nodes be able to comunicate with the
+The only requirement is that the compute nodes be able to communicate with the
 head node via an open port. MSM construction is done on the "head" node by
 the MSMAccelerator executable.
 
-MSMAccelerator currently interfaces with Gromacs and OpenMM. Support for NAMD is
-in the works.
+MSMAccelerator currently interfaces with Gromacs, Amber, OpenMM. Support for NAMD is in the works. Adding support for your favorite MD package is easy, and requires minimal modification of the code.
+
+Quick Start
+-----------
+
+So you want running MD to be as painless as possible, eh? Here are the steps you need to take
+
+* Install MSMBuilder, WorkQueue, MSMAccelerator (see below)
+* Acquire a PDB file specifing what protein you want to run
+* Set up a `project.yaml` file. See `tutorial/project.yaml` for an example.   We've included some other examples in `examples/`. Likely one will fit your needs.
+* Find computation resources. On each cluster you want to run, install cctools and your MD package of choice. Instructions and some helpful scripts are in `cluster-tools`.
+* Start up a master instance: `MSMAccelerator -p myproject.yaml`
+* Start up your workers on a remote cluster: `pbs_submit_workers`
+* Kick back and relax. You'll be getting MSMs, build automatically from optimally run MD simulations shortly. All data will be automatically retrieved and organized on your master node.
+* Publish. Yeah, we said it.
+
 
 Architecture
 ------------
