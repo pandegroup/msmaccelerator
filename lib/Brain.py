@@ -135,8 +135,9 @@ def generate_job():
     # save this conf to a file on disk
     t.init_pdb = conf
     return t 
-                
-        
+
+
+@with_db_lock
 def _generate_equilibration_job():
     """Generate a single equilibration job from the first forcefield
     
