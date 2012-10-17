@@ -32,7 +32,7 @@ from msmbuilder.assigning import assign_in_memory
 from sqlalchemy.sql import and_, or_
 from msmaccelerator import Project
 from models import Trajectory, Forcefield, MarkovModel, MSMGroup
-from database import Session
+from database import Session, with_db_lock
 import sampling
 from utils import load_file, save_file
 
@@ -41,7 +41,7 @@ logger = logging.getLogger('MSMAccelerator.Builder')
 def n_rounds():
     "Number of groups of MSMs that have been built"
     return Session.query(MSMGroup).count()
-        
+
 def is_sufficient_new_data():
     """Is there sufficient new data to build a new round?
         
@@ -51,7 +51,8 @@ def is_sufficient_new_data():
         True if there is sufficient new data for a new round
     """
 
-    qg, qt = Session.query(MSMGroup), Session.query(Trajectory)
+    qg = Session.query(MSMGroup)
+    qt = Session.query(Trajectory)
         
     msmgroup = qg.order_by(MSMGroup.id.desc()).first()
     if msmgroup is not None:
@@ -65,8 +66,9 @@ def is_sufficient_new_data():
         
     logger.info("%d trajs total, %d trajs built. Sufficient? %s", n_total, n_built, truth)
     return truth
-    
-    
+
+
+@with_db_lock
 def run_round(checkdata=True):
     """Activate the builder and build new MSMs (if necessary)
     
@@ -119,7 +121,7 @@ def run_round(checkdata=True):
             save_file(msm.assignments_fn, msm.assignments)
         if hasattr(msm, 'distances'):
             save_file(msm.distances_fn, msm.distances)
-            save_file(msm.inverse_assignments_fn, invert_assignments(msm.assignments))
+            save_file(msm.inverse_assignments_fn, dict(MSMLib.invert_assignments(msm.assignments)))
         
 
     # ======================================================================#
@@ -147,8 +149,8 @@ def run_round(checkdata=True):
     Session.flush()       
     logger.info("Round completed sucessfully")
     return True
-        
-        
+
+
 def joint_clustering():
     """Jointly cluster the the data from all of the forcefields
     
@@ -164,7 +166,7 @@ def joint_clustering():
         raise RuntimeError()
         
     # load the xyz coordinates from disk for each trajectory
-    load = lambda v: msmbuilder.Trajectory.LoadTrajectoryFile(v)
+    load = lambda v: msmbuilder.Trajectory.load_trajectory_file(v)
     loaded_trjs = [load(t.lh5_fn)[::Project().stride] for t in db_trajs]
     
     clusterer = Project().clusterer(trajectories=loaded_trjs)
@@ -198,14 +200,18 @@ def build_msm(forcefield, generators, trajs):
         return MarkovModel(forcefield=forcefield)
         
     class BuilderProject(dict):
-        def __init__(self):
-            self['NumTrajs'] = len(trajs)
-            self['TrajLengths'] = np.array([t.length for t in trajs])
-            
-        def LoadTraj(self, trj_index):
+        @property
+        def n_trajs(self):
+            return len(trajs)
+
+        @property
+        def traj_lengths(self):
+            return np.array([t.length for t in trajs])
+
+        def load_traj(self, trj_index):
             if trj_index < 0 or trj_index > len(trajs):
                 raise IndexError('Sorry')
-            return msmbuilder.Trajectory.LoadTrajectoryFile(trajs[trj_index].lh5_fn)
+            return msmbuilder.Trajectory.load_trajectory_file(trajs[trj_index].lh5_fn)
         
         
     logger.info('Assigning...')
@@ -246,7 +252,8 @@ def construct_counts_matrix(assignments):
         
     n_states  = np.max(assignments.flatten()) + 1
     raw_counts = MSMLib.get_count_matrix_from_assignments(assignments, n_states,
-                                               LagTime=Project().lagtime, Slide=True)
+                                               lag_time=Project().lagtime,
+                                               sliding_window=True)
         
     ergodic_counts = None
     if Project().trim:
@@ -276,34 +283,3 @@ def construct_counts_matrix(assignments):
         raise ValueError("Could not understand symmetrization method: %s" % Project().symmetrize)
         
     return counts
-
-
-# UTILITY FUNCTION
-# THIS SHOULD REALLY BE INSIDE MSMBUILDER
-def invert_assignments(assignments):
-    """Invert an assignments array -- that is, produce a mapping
-    from state -> traj/frame
-    
-    Parameters
-    ----------
-    assignments : np.ndarray
-        2D array of MSMBuilder assignments
-    
-    Returns
-    -------
-    inv_assignments : dict
-        Mapping from state -> traj,frame, such that inv_assignments[s]
-        gives the conformations assigned to state s.
-    
-    """
-    
-    
-    inverse_assignments = defaultdict(lambda:  [])
-    for i in xrange(assignments.shape[0]):
-        for j in xrange(assignments.shape[1]):
-            if assignments[i,j] != -1:
-                inverse_assignments[assignments[i,j]].append((i,j))
-    for key, value in inverse_assignments.items():
-        inverse_assignments[key] = np.array(value)
-        
-    return dict(inverse_assignments)
