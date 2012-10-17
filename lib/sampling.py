@@ -73,7 +73,7 @@ from msmaccelerator.models import Trajectory, Forcefield, MarkovModel, MSMGroup
 from sqlalchemy.sql import and_, or_, not_
 from sqlalchemy import func
 
-import adpative
+import adaptive
 
 logger = logging.getLogger('MSMAccelerator.sampling')
 

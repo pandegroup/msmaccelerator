@@ -129,7 +129,7 @@ def run_round(checkdata=True):
     # weights
     
     try:
-        Project().adaptive_sampling(Session, msmgroup, **Project().adaptive_options)
+        Project().adaptive_sampling(Session, msmgroup, **Project().adaptive_parameters)
         
         for msm in msmgroup.markov_models:
             if not isinstance(msm.model_selection_weight, numbers.Number):
