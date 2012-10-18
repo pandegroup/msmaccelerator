@@ -20,9 +20,10 @@
 
 
 import sys
+import matplotlib.pyplot as pp
 import IPython as ip
 import numpy as np
-#from msmbuilder import io
+from msmbuilder import io
 from msmbuilder import arglib
 import msmbuilder.Trajectory
 import shutil
@@ -33,27 +34,8 @@ from msmaccelerator.models import Trajectory, MSMGroup, Forcefield, MarkovModel
 from msmaccelerator.utils import load_file, save_file
 
 S = Session
+pp.ion()
 
-def main():
-    parser = arglib.ArgumentParser()
-    parser.add_argument('project_file', help='path to project.yaml')
-    subparsers = parser.add_subparsers(dest="subparser_name")
-    subparsers.add_parser('shell')
-    subparsers.add_parser('performance')
-    subparsers.add_parser('check_sufficient')
-    subparsers.add_parser('drop_project')
-    subparsers.add_parser('cleanup')
-
-
-    args = parser.parse_args(print_banner=False)
-
-    project = Project(args.project_file)
-    g = globals()
-    if not args.subparser_name in g:
-        raise NotImplementedError
-    g[args.subparser_name](project)
-        
-    
 def drop_project(project):
     val = raw_input('Are you sure you want to delete the project (deleting data and db)? yes/[no] ')
     if val != 'yes':
@@ -65,7 +47,6 @@ def drop_project(project):
     print 'Dropped database.'
     shutil.rmtree(project.project_dir)
     print 'Files deleted'
-    
 
 def shell(project):
     print "\033[95m>> from msmaccelerator.database import Session"
@@ -81,17 +62,28 @@ def shell(project):
     ipshell = InteractiveShellEmbed(banner1='')
     
     ipshell()
-    
+
 def check_sufficient(project):
     from msmaccelerator import Builder
     b = Builder(project)
     print 'Running\n'
     b.is_sufficient_new_data()
     print 'Done'
+
+def plot_n_states(project):
+    groups = S.query(MSMGroup).all()
+    ids = [g.id for g in groups]
+    states = [g.n_states for g in groups]
     
-def performance(project_file):
+    pp.plot(ids, states)
+    pp.title('Number of state vs. build round')
+    pp.xlabel('Build round')
+    pp.ylabel('Number of states')
+    
+    ip.embed()
+
+def performance(project):
     trajs = S.query(Trajectory).all()
-    
     
     for i, traj in enumerate(trajs):
         if traj.submit_time is not None:
@@ -99,11 +91,34 @@ def performance(project_file):
                 delta = traj.returned_time - traj.submit_time
                 simulation_frames = traj.length - 1
                 
-                print 'traj %3d\tframes: %d\twall time:%s' %  (i, simulation_frames, str(delta))
+                print 'traj %3d\tframes: %d\twall time: %s' %  (i, simulation_frames, _render_td(delta))
             else:
                 print 'traj %3d\tsubmitted       %s' % (i, traj.submit_time.strftime("%d %B %r"))
 
-    
+def _render_td(td):
+    "String representation of a timedelta as hours:minutes:seconds"
+    hours, remainder = divmod(td.total_seconds(), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return '%02d:%02d:%02d' % (int(hours), int(minutes), int(seconds))
 
+def main():
+    parser = arglib.ArgumentParser()
+    parser.add_argument('project_file', help='path to project.yaml')
+    subparsers = parser.add_subparsers(dest="subparser_name")
+    subparsers.add_parser('shell')
+    subparsers.add_parser('performance')
+    subparsers.add_parser('check_sufficient')
+    subparsers.add_parser('plot_n_states')
+    # subparsers.add_parser('drop_project')
+    # this is only for MySQL databases which are currently not in use
+
+
+    args = parser.parse_args(print_banner=False)
+
+    project = Project(args.project_file)
+    g = globals()
+    if not args.subparser_name in g:
+        raise NotImplementedError
+    g[args.subparser_name](project)
 if __name__ == '__main__':
     main()
