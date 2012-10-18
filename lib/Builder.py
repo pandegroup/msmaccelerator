@@ -143,7 +143,7 @@ def run_round(checkdata=True):
         logging.error('ADAPTIVE SAMPLING ERROR -- Could not run sampling algorithm')
         logging.error(e)
         logging.error('APPLYING DEFAULT ADAPTIVE ALGORITHM')
-        sampling.default(Session, msmgroup)
+        sampling.even_sampling(Session, msmgroup)
         
     #======================================================================= #
 

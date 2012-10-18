@@ -22,8 +22,8 @@
 import sys
 import IPython as ip
 import numpy as np
-import argparse
-from msmbuilder import Serializer
+#from msmbuilder import io
+from msmbuilder import arglib
 import msmbuilder.Trajectory
 import shutil
 
@@ -35,8 +35,8 @@ from msmaccelerator.utils import load_file, save_file
 S = Session
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-project_file', help='path to project.yaml', required=True)
+    parser = arglib.ArgumentParser()
+    parser.add_argument('project_file', help='path to project.yaml')
     subparsers = parser.add_subparsers(dest="subparser_name")
     subparsers.add_parser('shell')
     subparsers.add_parser('performance')
@@ -45,7 +45,7 @@ def main():
     subparsers.add_parser('cleanup')
 
 
-    args = parser.parse_args()
+    args = parser.parse_args(print_banner=False)
 
     project = Project(args.project_file)
     g = globals()
@@ -71,7 +71,7 @@ def shell(project):
     print "\033[95m>> from msmaccelerator.database import Session"
     print ">> from msmaccelerator.models import (Trajectory, MSMGroup,"
     print ">>                                    Forcefield, MarkovModel)"
-    print ">> P = Project({})".format(sys.argv[1])
+    print ">> P = Project(<your_project_file>)"
     print ">> S = Session"
     print "\033[0m"
     print "\n"*2
