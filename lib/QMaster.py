@@ -190,7 +190,7 @@ class QMaster(threading.Thread):
         if traj.mode is None or traj.forcefield is None:
             raise ValueError('malformed traj')
 
-        task = Task('python ./{driver} {pdb_fn} {ff} {water} {mode} {threads}'.format(
+        task = Task('chmod +x ./{driver}; ./{driver} {pdb_fn} {ff} {water} {mode} {threads}'.format(
             pdb_fn=remote_pdb_fn,
             mode=traj.mode,
             driver=remote_driver_fn,
